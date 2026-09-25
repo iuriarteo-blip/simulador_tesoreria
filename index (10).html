@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulador de tesorería a corto plazo</title>
+<meta name="description" content="Simulador docente de presupuesto de tesorería: NOF, FCO, FCA, IVA, impuestos, póliza de crédito y necesidad de financiación a corto plazo.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💶</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#06323c; --teal:#00a3ae; --teal-soft:#dff2f3; --paper:#ffffff; --ground:#f3f6f6;
+  --line:#d3dfe0; --muted:#4f6970; --out:#c0392b; --out-soft:#f8e3e0; --in:#00838c; --warn:#b7791f; --ok:#1f7a55;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --ink:#e4f2f3; --teal:#2cc4ce; --teal-soft:#123c43; --paper:#0d2328; --ground:#081a1e;
+  --line:#23434a; --muted:#9bb5ba; --out:#f07a6c; --out-soft:#3b1f1c; --in:#46cbd3; --warn:#e2ad4f; --ok:#5cc596;
+}}
+:root[data-theme="dark"]{
+  --ink:#e4f2f3; --teal:#2cc4ce; --teal-soft:#123c43; --paper:#0d2328; --ground:#081a1e;
+  --line:#23434a; --muted:#9bb5ba; --out:#f07a6c; --out-soft:#3b1f1c; --in:#46cbd3; --warn:#e2ad4f; --ok:#5cc596;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0; background:var(--ground); color:var(--ink); font-family:Archivo,"Helvetica Neue",Arial,sans-serif; font-size:16px; line-height:1.45; font-variant-numeric:tabular-nums}
+.wrap{max-width:1360px; margin:0 auto; padding:28px 24px 48px}
+header{display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:22px}
+h1{font-stretch:75%; font-weight:800; font-size:clamp(32px,4.6vw,54px); line-height:.98; margin:0}
+.sub{margin:10px 0 0; color:var(--muted); max-width:72ch}
+.reset{font:inherit; font-size:15px; border:1.5px solid var(--ink); background:transparent; color:var(--ink); padding:9px 18px; border-radius:999px; cursor:pointer}
+.reset:hover{background:var(--ink); color:var(--paper)}
+button:focus-visible, input:focus-visible, select:focus-visible{outline:3px solid var(--teal); outline-offset:2px}
+.grid{display:grid; grid-template-columns:minmax(300px,370px) 1fr; gap:24px; align-items:start}
+@media (max-width:960px){.grid{grid-template-columns:1fr}}
+.controls{background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:6px 20px 14px}
+fieldset{border:0; padding:14px 0 6px; margin:0; border-bottom:1px solid var(--line)}
+fieldset:last-child{border-bottom:0}
+legend{font-stretch:80%; font-weight:750; font-size:19px; padding:0; margin-bottom:4px}
+.hint{font-size:13.5px; color:var(--muted); margin:2px 0 6px}
+.row{display:grid; grid-template-columns:1fr auto; gap:2px 12px; align-items:baseline; margin:10px 0}
+.row label{font-size:14.5px}
+.row output{font-weight:700; font-size:15px; white-space:nowrap}
+.row input[type=range]{grid-column:1 / -1; width:100%; accent-color:var(--teal)}
+.row.chk{display:block; font-size:14.5px}
+.row.chk input{accent-color:var(--teal); width:18px; height:18px; vertical-align:-3px; margin-right:6px}
+.row select{grid-column:1 / -1; font:inherit; font-size:15px; padding:6px 8px; border:1px solid var(--line); border-radius:4px; background:var(--paper); color:var(--ink)}
+.derived{background:var(--teal-soft); border-radius:6px; padding:10px 12px; margin:10px 0 4px; font-size:14px}
+.derived table{width:100%; border-collapse:collapse}
+.derived td{padding:2px 0}
+.derived td:last-child{text-align:right; font-weight:600; white-space:nowrap}
+.derived tr.t td{border-top:1.5px solid var(--ink); font-weight:800; padding-top:4px}
+.panel{display:flex; flex-direction:column; gap:20px; min-width:0}
+.hero{background:#06323c; color:#fff; border-radius:6px; padding:22px 26px}
+.hero p{margin:0; font-size:19px; line-height:1.5; max-width:78ch}
+.hero b{color:#6fe0e7}
+.hero .bad{color:#ff9d90}
+.kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:6px; overflow:hidden}
+.kpi{background:var(--paper); padding:14px 16px}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi .n{font-size:14px; color:var(--muted)}
+.kpi .v{font-stretch:78%; font-weight:800; font-size:30px; line-height:1.1; margin:2px 0}
+.kpi .d{font-size:13.5px; font-weight:600}
+.card{background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:18px 20px}
+.card h2{font-stretch:80%; font-size:23px; margin:0 0 4px; font-weight:750}
+.card p.note{margin:0 0 12px; color:var(--muted); font-size:14.5px; max-width:80ch}
+.scroll{overflow-x:auto}
+svg text{font-family:Archivo,Arial,sans-serif}
+.legend{display:flex; flex-wrap:wrap; gap:16px; font-size:14px; color:var(--muted); margin-top:6px}
+.legend i{display:inline-block; width:22px; height:4px; vertical-align:middle; margin-right:6px; border-radius:2px}
+.two{display:grid; grid-template-columns:1fr 1fr; gap:20px}
+@media (max-width:1150px){.two{grid-template-columns:1fr}}
+table.bridge{width:100%; border-collapse:collapse; font-size:15.5px}
+table.bridge td{padding:7px 0; border-bottom:1px solid var(--line)}
+table.bridge td:last-child{text-align:right; font-weight:650; white-space:nowrap}
+table.bridge tr.t td{font-weight:800; border-bottom:0; border-top:2px solid var(--ink)}
+table.month{border-collapse:collapse; font-size:14px; min-width:1100px; width:100%}
+table.month th, table.month td{padding:6px 8px; text-align:right; white-space:nowrap; border-bottom:1px solid var(--line)}
+table.month th:first-child, table.month td:first-child{text-align:left; position:sticky; left:0; background:var(--paper)}
+table.month thead th{color:var(--muted); font-weight:600; border-bottom:2px solid var(--ink)}
+table.month tr.t td{font-weight:800}
+table.month td.neg{color:var(--out)}
+.why{margin:0; padding-left:20px}
+.why li{margin:7px 0; max-width:80ch}
+footer{margin-top:26px; color:var(--muted); font-size:13.5px; max-width:100ch}
+.pos{color:var(--ok)} .neg{color:var(--out)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Por qué una empresa rentable necesita liquidez y financiación a corto plazo</h1>
+      <p class="sub">Presupuesto de tesorería mes a mes. Ajusta ventas, costes, plazos de cobro y pago, estacionalidad e inversiones, y observa cuándo se queda sin caja y cuánta financiación a corto necesita.</p>
+    </div>
+    <button class="reset" id="reset" type="button">Volver a la situación inicial</button>
+  </header>
+
+  <div class="grid">
+    <form class="controls" id="f" onsubmit="return false">
+      <fieldset><legend>Ventas</legend>
+        <div class="row"><label for="ventas">Ventas del año</label><output for="ventas"></output><input type="range" id="ventas" min="1000000" max="20000000" step="100000"></div>
+        <div class="row"><label for="crec">Crecimiento de las ventas en el año</label><output for="crec"></output><input type="range" id="crec" min="-20" max="50" step="1"></div>
+        <div class="row"><label for="perfil">Estacionalidad</label><select id="perfil"><option value="plana">Ventas planas todo el año</option><option value="verano">Campaña de verano</option><option value="final">Campaña de final de año</option></select></div>
+        <div class="row"><label for="intens">Intensidad de la estacionalidad</label><output for="intens"></output><input type="range" id="intens" min="0" max="150" step="10"></div>
+      </fieldset>
+      <fieldset><legend>Costes</legend>
+        <div class="row"><label for="compras">Compras de materiales</label><output for="compras"></output><input type="range" id="compras" min="20" max="80" step="1"></div>
+        <div class="row"><label for="personal">Gastos de personal anuales (14 pagas)</label><output for="personal"></output><input type="range" id="personal" min="0" max="6000000" step="50000"></div>
+        <div class="row"><label for="otros">Otros gastos fijos anuales</label><output for="otros"></output><input type="range" id="otros" min="0" max="3000000" step="25000"></div>
+        <div class="derived" aria-live="polite"><table id="ebitdaCalc"></table></div>
+      </fieldset>
+      <fieldset><legend>Plazos del circulante</legend>
+        <div class="row"><label for="pmc">Plazo de cobro a clientes</label><output for="pmc"></output><input type="range" id="pmc" min="0" max="150" step="5"></div>
+        <div class="row"><label for="pme">Existencias en almacén</label><output for="pme"></output><input type="range" id="pme" min="0" max="120" step="5"></div>
+        <div class="row"><label for="pmp">Plazo de pago a proveedores</label><output for="pmp"></output><input type="range" id="pmp" min="0" max="150" step="5"></div>
+      </fieldset>
+      <fieldset><legend>Inversión y deuda a largo plazo</legend>
+        <div class="row"><label for="inv">Inversión en maquinaria (sin IVA)</label><output for="inv"></output><input type="range" id="inv" min="0" max="2000000" step="50000"></div>
+        <div class="row"><label for="invMes">Mes de pago de la inversión</label><select id="invMes"></select></div>
+        <div class="row"><label for="deudaLP">Préstamo a largo pendiente al 1 de enero</label><output for="deudaLP"></output><input type="range" id="deudaLP" min="0" max="6000000" step="50000"></div>
+        <div class="row"><label for="tipoLP">Tipo de interés del préstamo</label><output for="tipoLP"></output><input type="range" id="tipoLP" min="0" max="10" step="0.25"></div>
+        <div class="row"><label for="plazoLP">Plazo pendiente del préstamo</label><output for="plazoLP"></output><input type="range" id="plazoLP" min="1" max="20" step="1"></div>
+        <p class="hint" id="cuotaTxt"></p>
+      </fieldset>
+      <fieldset><legend>Impuestos</legend>
+        <div class="row"><label for="amort">Amortización anual</label><output for="amort"></output><input type="range" id="amort" min="0" max="1000000" step="10000"></div>
+        <div class="row"><label for="tasaIS">Tipo del impuesto sobre beneficios</label><output for="tasaIS"></output><input type="range" id="tasaIS" min="0" max="35" step="1"></div>
+        <div class="row chk"><label for="iva"><input type="checkbox" id="iva"> Incluir IVA del 21 % con liquidación trimestral</label></div>
+      </fieldset>
+      <fieldset><legend>Accionistas</legend>
+        <div class="row"><label for="div">Dividendos</label><output for="div"></output><input type="range" id="div" min="0" max="1000000" step="10000"></div>
+        <div class="row"><label for="divMes">Mes de pago de los dividendos</label><select id="divMes"></select></div>
+        <div class="row"><label for="ampl">Ampliación de capital</label><output for="ampl"></output><input type="range" id="ampl" min="0" max="2000000" step="50000"></div>
+        <div class="row"><label for="amplMes">Mes de la ampliación</label><select id="amplMes"></select></div>
+      </fieldset>
+      <fieldset><legend>Liquidez y financiación a corto</legend>
+        <div class="row"><label for="tes0">Tesorería al 1 de enero</label><output for="tes0"></output><input type="range" id="tes0" min="0" max="2000000" step="10000"></div>
+        <div class="row"><label for="minimo">Saldo mínimo de seguridad</label><output for="minimo"></output><input type="range" id="minimo" min="0" max="1000000" step="10000"></div>
+        <div class="row"><label for="limite">Límite de la póliza de crédito</label><output for="limite"></output><input type="range" id="limite" min="0" max="3000000" step="50000"></div>
+        <div class="row"><label for="tipo">Tipo de interés de la póliza</label><output for="tipo"></output><input type="range" id="tipo" min="0" max="12" step="0.25"></div>
+      </fieldset>
+    </form>
+
+    <div class="panel">
+      <section class="hero" aria-live="polite"><p id="msg"></p></section>
+
+      <section class="kpis" id="kpis" aria-label="Indicadores y cambio respecto a la situación inicial"></section>
+
+      <section class="card">
+        <h2>Tesorería mes a mes</h2>
+        <p class="note">Saldo al final de cada mes. La zona roja es el hueco que hay que cubrir con financiación a corto para no bajar del saldo mínimo; las barras, lo dispuesto de la póliza.</p>
+        <div class="scroll"><svg id="cash" viewBox="0 0 1000 440" width="100%" role="img" aria-label="Evolución mensual de la tesorería"></svg></div>
+        <div class="legend">
+          <span><i style="background:var(--muted)"></i>Sin financiación a corto</span>
+          <span><i style="background:var(--ink)"></i>Con la póliza</span>
+          <span><i style="background:var(--warn)"></i>Saldo mínimo</span>
+          <span><i style="background:var(--teal)"></i>Póliza dispuesta</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>FCO y FCA mes a mes</h2>
+        <p class="note">FCO: lo que genera la operativa después de pagar proveedores, personal, gastos e inversiones. FCA: lo que queda después de atender la deuda y sumar la financiación nueva. Variación de tesorería = FCA − dividendos + ampliación de capital.</p>
+        <div class="scroll"><svg id="flujos" viewBox="0 0 1000 330" width="100%" role="img" aria-label="FCO y FCA mensuales"></svg></div>
+        <div class="legend">
+          <span><i style="background:var(--ink)"></i>FCO</span>
+          <span><i style="background:var(--teal)"></i>FCA</span>
+        </div>
+      </section>
+      <div class="two">
+        <section class="card">
+          <h2>Del EBITDA al FCO y al FCA</h2>
+          <p class="note">El EBITDA no es caja: las NOF y la inversión lo separan del FCO, y la deuda, del FCA.</p>
+          <table class="bridge" id="bridge"></table>
+        </section>
+        <section class="card">
+          <h2>Necesidades operativas de fondos</h2>
+          <p class="note">NOF = clientes + existencias − proveedores, al final de cada mes. La parte permanente pide financiación a largo; la estacional, a corto.</p>
+          <div class="scroll"><svg id="nof" viewBox="0 0 560 320" width="100%" role="img" aria-label="NOF mensuales"></svg></div>
+          <div class="legend">
+            <span><i style="background:var(--ink)"></i>NOF permanentes</span>
+            <span><i style="background:var(--teal)"></i>NOF estacionales</span>
+          </div>
+        </section>
+      </div>
+
+      <section class="card">
+        <h2>Por qué hace falta financiación a corto plazo</h2>
+        <ul class="why" id="why"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Presupuesto de tesorería</h2>
+        <p class="note">Cobros y pagos de cada mes, en euros.</p>
+        <div class="scroll"><table class="month" id="month"></table></div>
+      </section>
+    </div>
+  </div>
+  <footer>Modelo docente simplificado. FCO = cobros − pagos operativos − liquidaciones de IVA − impuesto sobre BAII − inversiones. FCA = FCO − intereses · (1 − t) − principal + entrada neta de deuda. Variación de tesorería = FCA − dividendos + ampliación de capital. El impuesto se calcula sobre el BAII y el ahorro fiscal de los intereses del préstamo se suma en el FCA; ambos se pagan en julio, suponiendo que el ejercicio anterior fue similar. Los intereses de la póliza no se ajustan por impuestos. El IVA (21 %) se aplica a ventas, compras e inversión y se liquida en el mes siguiente a cada trimestre; los saldos a compensar pasan al trimestre siguiente. Personal y otros gastos fijos, sin IVA; personal en 14 pagas, con extras en junio y diciembre. Meses de 30 días. La póliza se dispone cuando el saldo baja del mínimo y se devuelve cuando hay excedente.</footer>
+</div>
+
+<script>
+const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const MESES_L = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const PERFILES = {
+  plana: Array(12).fill(1),
+  verano: [0.7,0.7,0.8,0.9,1.1,1.3,1.5,1.4,1.1,0.9,0.8,0.8],
+  final:  [0.8,0.7,0.8,0.8,0.9,0.9,0.8,0.7,1.0,1.2,1.6,1.8]
+};
+const INI = {ventas:6000000, crec:0, perfil:'verano', intens:100, compras:55, personal:1400000, otros:600000,
+  pmc:75, pme:45, pmp:60, inv:300000, invMes:2, deudaLP:1500000, tipoLP:4, plazoLP:6, amort:150000, tasaIS:25, iva:true,
+  div:0, divMes:5, ampl:0, amplMes:0, tes0:150000, minimo:100000, limite:850000, tipo:5};
+const ids = Object.keys(INI);
+const f = document.getElementById('f');
+['invMes','divMes','amplMes'].forEach(id => document.getElementById(id).innerHTML = MESES_L.map((m,i)=>`<option value="${i}">${m[0].toUpperCase()+m.slice(1)}</option>`).join(''));
+
+function fmt(n, d=0){
+  const neg = n < 0; let [i, fr] = Math.abs(n).toFixed(d).split('.');
+  i = i.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const zero = +i.replace(/\./g,'') === 0 && !(fr && +fr > 0);
+  return (neg && !zero ? '−' : '') + i + (fr ? ',' + fr : '');
+}
+const eur = n => fmt(n) + ' €';
+const sgnEur = n => (Math.round(n) > 0 ? '+' : '') + eur(n);
+const pct = (n,d=1) => fmt(n,d) + ' %';
+function ticks(mn, mx, n=4){ const raw=(mx-mn)/n, p=Math.pow(10,Math.floor(Math.log10(raw))); const st=[1,2,2.5,5,10].map(k=>k*p).find(k=>k>=raw); const out=[]; for(let v=Math.ceil(mn/st)*st; v<=mx+1e-6; v+=st) out.push(Math.abs(v)<1e-6?0:v); return out; }
+function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+function read(){ const s={}; ids.forEach(k => { const el=document.getElementById(k); s[k] = k==='iva' ? el.checked : k==='perfil' ? el.value : parseFloat(el.value); }); return s; }
+
+function calc(s){
+  const prof = PERFILES[s.perfil], k = s.intens/100, g = s.crec/100, c = s.compras/100;
+  const w = j => 1 + k*(prof[((j%12)+12)%12] - 1);
+  let norm = 0; for (let i=0;i<12;i++) norm += w(i)*Math.pow(1+g, i/12);
+  const base = s.ventas/norm;
+  const sales = i => base * w(i) * Math.pow(1+g, i/12);
+  const cogs = i => sales(i) * c;
+  const tail = (fn, e, days) => { let rem=days/30, i=e, sum=0; while(rem>1e-9){ const p=Math.min(1,rem); sum+=fn(i)*p; rem-=p; i--; } return sum; };
+  const head = (fn, st, days) => { let rem=days/30, i=st, sum=0; while(rem>1e-9){ const p=Math.min(1,rem); sum+=fn(i)*p; rem-=p; i++; } return sum; };
+  const exist = i => head(cogs, i+1, s.pme);
+  const compras = i => cogs(i) + exist(i) - exist(i-1);
+  const cli = i => tail(sales, i, s.pmc);
+  const prov = i => tail(compras, i, s.pmp);
+  const nof = i => cli(i) + exist(i) - prov(i);
+  const pagaMes = s.personal/14;
+  const t = s.tasaIS/100, ivaR = s.iva ? 0.21 : 0;
+  // ventas y EBITDA del año (devengo)
+  let ventasAno = 0, consumo = 0; for (let m=0;m<12;m++){ ventasAno += sales(m); consumo += cogs(m); }
+  const ebitda = ventasAno - consumo - s.personal - s.otros;
+  // préstamo a largo (sistema francés, cuotas mensuales)
+  const rLP = s.tipoLP/100/12, nLP = s.plazoLP*12;
+  const cuotaLP = s.deudaLP<=0 ? 0 : (rLP===0 ? s.deudaLP/nLP : s.deudaLP*rLP/(1-Math.pow(1+rLP,-nLP)));
+  const lp = []; let bal = s.deudaLP;
+  for (let m=0;m<12;m++){ const i = bal*rLP, pr = Math.min(bal, cuotaLP - i); lp.push({i, pr}); bal -= pr; }
+  const intLPano = lp.reduce((a,x)=>a+x.i,0), princAno = lp.reduce((a,x)=>a+x.pr,0);
+  // impuesto sobre beneficios
+  const baii = ebitda - s.amort, bai = baii - intLPano;
+  const isBAII = t*Math.max(baii,0), isCash = t*Math.max(bai,0), escudo = isBAII - isCash;
+  // IVA
+  const rep = i => sales(i)*ivaR, sop = i => compras(i)*ivaR + (i===s.invMes ? s.inv*ivaR : 0);
+  let carry = 0;
+  const liq = m => { if (m%3!==0) return 0; let x = carry; for (let i=m-3;i<m;i++) x += rep(i) - sop(i); if (x>0){ carry=0; return x; } carry = x; return 0; };
+  const rows = [];
+  let sinPol = s.tes0, saldo = s.tes0, disp = 0, intTot = 0, deficit = 0, deficitMes = -1, usoMax = 0, ivaEfecto = 0;
+  for (let m=0; m<12; m++){
+    const v = sales(m);
+    const cobrosEx = cli(m-1) + v - cli(m);
+    const pagosEx = prov(m-1) + compras(m) - prov(m);
+    const cobros = cobrosEx*(1+ivaR), pagosProv = pagosEx*(1+ivaR);
+    const personal = pagaMes * ((m===5||m===11) ? 2 : 1);
+    const otros = s.otros/12;
+    const invEx = (m===s.invMes) ? s.inv : 0, invP = invEx*(1+ivaR);
+    const liqIVA = liq(m);
+    const isPago = m===6 ? isBAII : 0, escudoM = m===6 ? escudo : 0;
+    const fco = cobros - pagosProv - personal - otros - liqIVA - isPago - invP;
+    ivaEfecto += cobrosEx*ivaR - pagosEx*ivaR - invEx*ivaR - liqIVA;
+    const divM = m===s.divMes ? s.div : 0, amplM = m===s.amplMes ? s.ampl : 0;
+    const flujoSin = fco - cuotaLP + escudoM - divM + amplM;
+    sinPol += flujoSin;
+    const interes = disp * s.tipo/100/12;
+    const pre = saldo + flujoSin - interes;
+    let dDisp = 0;
+    if (pre < s.minimo){ dDisp = Math.min(s.limite - disp, s.minimo - pre); }
+    else if (disp > 0){ dDisp = -Math.min(disp, pre - s.minimo); }
+    disp += dDisp; saldo = pre + dDisp; intTot += interes;
+    usoMax = Math.max(usoMax, disp);
+    const falta = Math.max(0, s.minimo - saldo);
+    if (falta > deficit){ deficit = falta; deficitMes = m; }
+    const fca = fco - lp[m].i - lp[m].pr + escudoM - interes + dDisp;
+    const vt = fca - divM + amplM;
+    rows.push({m, v, cobros, pagosProv, personal, otros, liqIVA, isPago, invP, fco, intLP:lp[m].i, princ:lp[m].pr, escudoM, interes, dDisp, fca, divM, amplM, vt, sinPol, disp, saldo, nof:nof(m)});
+  }
+  const nof0 = nof(-1), nof12 = rows[11].nof;
+  const nofs = rows.map(r=>r.nof), nofMin = Math.min(nof0, ...nofs), nofMax = Math.max(nof0, ...nofs);
+  let necMax = 0, necMes = -1;
+  rows.forEach(r => { const n = s.minimo - r.sinPol; if (n > necMax){ necMax = n; necMes = r.m; } });
+  const varCaja = rows[11].sinPol - s.tes0;
+  const fcoAno = rows.reduce((a,x)=>a+x.fco,0), fcaAno = rows.reduce((a,x)=>a+x.fca,0);
+  return {rows, ventasAno, consumo, ebitda, margen: ventasAno ? ebitda/ventasAno*100 : 0, nof0, nof12, dNof: nof12-nof0, nofMin, nofMax,
+    necMax, necMes, varCaja, intTot, deficit, deficitMes, usoMax, ciclo: s.pmc + s.pme - s.pmp, tesFinal: rows[11].saldo, dispFinal: rows[11].disp,
+    fcoAno, fcaAno, cuotaLP, intLPano, princAno, baii, bai, isBAII, isCash, escudo, ivaEfecto};
+}
+
+function outputs(s){
+  const set = (k, t) => { const o = f.querySelector(`output[for="${k}"]`); if (o) o.textContent = t; };
+  ['ventas','personal','otros','inv','deudaLP','amort','div','ampl','tes0','minimo','limite'].forEach(k => set(k, eur(s[k])));
+  set('tipoLP', pct(s.tipoLP,2)); set('plazoLP', fmt(s.plazoLP) + (s.plazoLP===1?' año':' años')); set('tasaIS', pct(s.tasaIS,0));
+  set('crec', (s.crec>0?'+':'') + pct(s.crec,0)); set('intens', pct(s.intens,0));
+  set('compras', pct(s.compras,0) + ' de las ventas');
+  ['pmc','pmp'].forEach(k => set(k, fmt(s[k]) + ' días')); set('pme', fmt(s.pme) + ' días de ventas');
+  set('tipo', pct(s.tipo, 2));
+}
+
+function update(){
+  const s = read(); outputs(s);
+  const r = calc(s), r0 = calc(INI);
+  document.getElementById('ebitdaCalc').innerHTML =
+    `<tr><td>Ventas del año</td><td>${eur(r.ventasAno)}</td></tr>
+     <tr><td>− Consumo de materiales (${pct(s.compras,0)})</td><td>${eur(-r.consumo)}</td></tr>
+     <tr><td>− Gastos de personal</td><td>${eur(-s.personal)}</td></tr>
+     <tr><td>− Otros gastos fijos</td><td>${eur(-s.otros)}</td></tr>
+     <tr class="t"><td>= EBITDA</td><td>${eur(r.ebitda)}</td></tr>
+     <tr><td>Margen EBITDA = EBITDA / ventas</td><td>${pct(r.margen)}</td></tr>
+     <tr><td>− Amortización</td><td>${eur(-s.amort)}</td></tr>
+     <tr class="t"><td>= BAII</td><td>${eur(r.baii)}</td></tr>
+     <tr><td>− Intereses del préstamo a largo</td><td>${eur(-r.intLPano)}</td></tr>
+     <tr class="t"><td>= BAI</td><td>${eur(r.bai)}</td></tr>
+     <tr><td>Impuesto sobre beneficios (${pct(s.tasaIS,0)}), se paga en julio</td><td>${eur(-r.isCash)}</td></tr>`;
+  document.getElementById('cuotaTxt').textContent = s.deudaLP>0 ? `Cuota mensual (sistema francés): ${eur(r.cuotaLP)}. En el año: ${eur(r.intLPano)} de intereses y ${eur(r.princAno)} de principal.` : 'Sin préstamo a largo plazo.';
+  drawMsg(r, s); drawKpis(r, r0); drawCash(r, s); drawFlujos(r); drawBridge(r, s); drawNof(r); drawWhy(r, s); drawMonth(r, s);
+}
+
+function drawMsg(r, s){
+  let t;
+  const min = r.rows.reduce((a,x)=> x.sinPol < a.sinPol ? x : a, r.rows[0]);
+  if (r.ebitda <= 0) t = `La empresa pierde dinero: su EBITDA es de <span class="bad">${eur(r.ebitda)}</span>. Aquí la financiación a corto no resuelve nada; el problema es de rentabilidad.`;
+  else if (r.necMax <= 0) t = `La empresa gana <b>${eur(r.ebitda)}</b> de EBITDA y su tesorería nunca baja del saldo mínimo: no necesita financiación a corto este año.`;
+  else t = `La empresa gana <b>${eur(r.ebitda)}</b> de EBITDA (${pct(r.margen)} de margen), pero en ${MESES_L[r.necMes]} su tesorería sin financiación sería de <span class="bad">${eur(min.sinPol)}</span>. Necesita hasta <b>${eur(r.necMax)}</b> de financiación a corto plazo para mantener el saldo mínimo.`;
+  if (r.ebitda > 0 && r.deficit > 0.5) t += ` La póliza de ${eur(s.limite)} no basta: en ${MESES_L[r.deficitMes]} faltan <span class="bad">${eur(r.deficit)}</span>.`;
+  document.getElementById('msg').innerHTML = t;
+}
+
+function drawKpis(r, r0){
+  const items = [
+    ['Margen EBITDA', r.margen, r0.margen, 1, v=>pct(v), d=>(d>0?'+':'−')+fmt(Math.abs(d),1)+' puntos'],
+    ['FCO del año', r.fcoAno, r0.fcoAno, 1, eur, sgnEur],
+    ['FCA del año', r.fcaAno, r0.fcaAno, 1, eur, sgnEur],
+    ['Variación de tesorería en el año (sin póliza)', r.varCaja, r0.varCaja, 1, eur, sgnEur],
+    ['Necesidad máxima de financiación a corto', r.necMax, r0.necMax, -1, eur, sgnEur],
+    ['NOF máximas del año', r.nofMax, r0.nofMax, -1, eur, sgnEur],
+    ['Ciclo de caja (cobro + existencias − pago)', r.ciclo, r0.ciclo, -1, v=>fmt(v)+' días', d=>(d>0?'+':'−')+fmt(Math.abs(d))+' días'],
+    ['Intereses de la póliza en el año', r.intTot, r0.intTot, -1, eur, sgnEur]
+  ];
+  document.getElementById('kpis').innerHTML = items.map(([n,v,v0,dir,fv,fd]) => {
+    const d = v - v0, same = Math.abs(d) < (fv===eur ? 0.5 : 0.05);
+    const col = same ? css('--muted') : (d*dir>0 ? css('--ok') : css('--out'));
+    return `<div class="kpi"><div class="n">${n}</div><div class="v">${fv(v)}</div><div class="d" style="color:${col}">${same ? 'Igual que al inicio' : (d>0?'▲ ':'▼ ') + fd(d) + ' respecto al inicio'}</div></div>`;
+  }).join('');
+}
+
+function drawCash(r, s){
+  const W=1000, H=440, L=118, R=16, T=20, B=300, PB=420, PT=330;
+  const pts = [{lab:'Inicio', sin:s.tes0, con:s.tes0, disp:0}].concat(r.rows.map(x=>({lab:MESES[x.m], sin:x.sinPol, con:x.saldo, disp:x.disp})));
+  let mn = Math.min(0, s.minimo, ...pts.map(p=>Math.min(p.sin,p.con))), mx = Math.max(s.minimo, ...pts.map(p=>Math.max(p.sin,p.con)));
+  const pad = (mx-mn)*0.08 || 10000; mx += pad; mn -= pad;
+  const n = pts.length, X = i => L + i*(W-L-R)/(n-1), Y = v => T + (mx-v)/(mx-mn)*(B-T);
+  const ink=css('--ink'), muted=css('--muted'), line=css('--line'), warn=css('--warn'), teal=css('--teal'), out=css('--out');
+  let g = '';
+  ticks(mn,mx,5).forEach(v => { g += `<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="${line}"/><text x="${L-10}" y="${Y(v)+5}" font-size="14" text-anchor="end" fill="${muted}">${eur(v)}</text>`; });
+  g += `<line x1="${L}" x2="${W-R}" y1="${Y(0)}" y2="${Y(0)}" stroke="${ink}" stroke-width="1.3"/>`;
+  // deficit area between minimo and sin-póliza line
+  let area = '';
+  for (let i=0;i<n-1;i++){
+    const a=pts[i].sin, b=pts[i+1].sin, m=s.minimo;
+    if (a>=m && b>=m) continue;
+    let x1=X(i), x2=X(i+1), ya=Math.min(a,m), yb=Math.min(b,m);
+    if (a>m){ const t=(a-m)/(a-b); x1 = X(i)+t*(X(i+1)-X(i)); ya=m; }
+    if (b>m){ const t=(m-a)/(b-a); x2 = X(i)+t*(X(i+1)-X(i)); yb=m; }
+    area += `<polygon points="${x1},${Y(m)} ${x2},${Y(m)} ${x2},${Y(yb)} ${x1},${Y(ya)}" fill="${out}" opacity=".22"/>`;
+  }
+  g += area;
+  g += `<line x1="${L}" x2="${W-R}" y1="${Y(s.minimo)}" y2="${Y(s.minimo)}" stroke="${warn}" stroke-width="2.5" stroke-dasharray="8 5"/>`;
+  g += `<polyline fill="none" stroke="${muted}" stroke-width="2.5" stroke-dasharray="6 5" points="${pts.map((p,i)=>X(i)+','+Y(p.sin)).join(' ')}"/>`;
+  g += `<polyline fill="none" stroke="${ink}" stroke-width="3.5" points="${pts.map((p,i)=>X(i)+','+Y(p.con)).join(' ')}"/>`;
+  pts.forEach((p,i)=>{ g += `<circle cx="${X(i)}" cy="${Y(p.con)}" r="4.5" fill="${p.con < s.minimo-0.5 ? out : ink}"/>`; });
+  // póliza bars
+  const dmax = Math.max(s.limite, ...pts.map(p=>p.disp), 1);
+  const YP = v => PB - v/dmax*(PB-PT);
+  g += `<text x="${L-10}" y="${PT+6}" font-size="14" text-anchor="end" fill="${muted}">${eur(dmax)}</text><text x="${L-10}" y="${PB+5}" font-size="14" text-anchor="end" fill="${muted}">0 €</text>`;
+  if (s.limite>0) g += `<line x1="${L}" x2="${W-R}" y1="${YP(s.limite)}" y2="${YP(s.limite)}" stroke="${line}" stroke-dasharray="4 4"/>`;
+  g += `<line x1="${L}" x2="${W-R}" y1="${PB}" y2="${PB}" stroke="${ink}"/>`;
+  pts.forEach((p,i)=>{ if (p.disp>0.5) g += `<rect x="${X(i)-16}" y="${YP(p.disp)}" width="32" height="${PB-YP(p.disp)}" fill="${teal}" rx="2"/>`; });
+  pts.forEach((p,i)=>{ g += `<text x="${X(i)}" y="${B+22}" font-size="14" text-anchor="middle" fill="${muted}">${p.lab}</text>`; });
+  document.getElementById('cash').innerHTML = g;
+}
+
+function drawFlujos(r){
+  const W=1000, H=330, L=118, R=16, T=16, B=290;
+  const vals = r.rows.flatMap(x=>[x.fco,x.fca]);
+  let mn=Math.min(0,...vals), mx=Math.max(0,...vals); const pad=(mx-mn)*.08||10000; mn-=pad; mx+=pad;
+  const Y = v => T + (mx-v)/(mx-mn)*(B-T), bw=(W-L-R)/12;
+  const ink=css('--ink'), teal=css('--teal'), muted=css('--muted'), line=css('--line'), out=css('--out');
+  let g='';
+  ticks(mn,mx,5).forEach(v => { g += `<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="${line}"/><text x="${L-10}" y="${Y(v)+5}" font-size="14" text-anchor="end" fill="${muted}">${eur(v)}</text>`; });
+  r.rows.forEach((x,i) => {
+    const x0 = L + i*bw + bw*0.12, ww = bw*0.36;
+    [[x.fco,ink,0],[x.fca,teal,1]].forEach(([v,c,j]) => {
+      const y1=Y(Math.max(v,0)), h=Math.max(1,Math.abs(Y(v)-Y(0)));
+      g += `<rect x="${x0+j*(ww+2)}" y="${y1}" width="${ww}" height="${h}" fill="${c}" opacity="${v<0?0.55:1}" stroke="${v<0?out:'none'}" stroke-width="${v<0?1.5:0}"/>`;
+    });
+    g += `<text x="${L+i*bw+bw/2}" y="${B+24}" font-size="14" text-anchor="middle" fill="${muted}">${MESES[i]}</text>`;
+  });
+  g += `<line x1="${L}" x2="${W-R}" y1="${Y(0)}" y2="${Y(0)}" stroke="${ink}" stroke-width="1.3"/>`;
+  document.getElementById('flujos').innerHTML = g;
+}
+
+function drawBridge(r, s){
+  const row = (l, v, cls='') => `<tr class="${cls}"><td>${l}</td><td class="${v<-0.5?'neg':''}">${eur(v)}</td></tr>`;
+  const t = s.tasaIS/100;
+  let h = row('EBITDA del año', r.ebitda) +
+    row(`− Impuesto sobre BAII (${pct(s.tasaIS,0)} × BAII)`, -r.isBAII) +
+    row(r.dNof>=0 ? '− Aumento de NOF (caja inmovilizada)' : '+ Disminución de NOF (caja liberada)', -r.dNof) +
+    row('− Inversión', -s.inv);
+  if (s.iva) h += row('± Desfase del IVA (cobrado, pagado y liquidado)', r.ivaEfecto);
+  h += row('= FCO (flujo de caja operativo)', r.fcoAno, 't') +
+    row(`− Intereses del préstamo × (1 − t)`, -(r.intLPano - r.escudo)) +
+    row('− Devolución de principal', -r.princAno) +
+    row('− Intereses de la póliza', -r.intTot) +
+    row('+ Entrada neta de deuda a corto (póliza)', r.dispFinal) +
+    row('= FCA (flujo de caja del accionista)', r.fcaAno, 't') +
+    row('− Dividendos', -s.div) +
+    row('+ Ampliación de capital', s.ampl) +
+    row('= Variación de tesorería', r.fcaAno - s.div + s.ampl, 't') +
+    row('Tesorería a 31 de diciembre', r.tesFinal);
+  document.getElementById('bridge').innerHTML = h;
+}
+
+function drawNof(r){
+  const W=560, H=320, L=112, R=10, T=16, B=270;
+  const vals = r.rows.map(x=>x.nof), mn0 = Math.min(0, ...vals), mx = Math.max(...vals, 1)*1.08;
+  const Y = v => T + (mx-v)/(mx-mn0)*(B-T), bw=(W-L-R)/12;
+  const ink=css('--ink'), teal=css('--teal'), muted=css('--muted'), line=css('--line');
+  let g = '';
+  ticks(mn0,mx,4).forEach(v => { g += `<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="${line}"/><text x="${L-8}" y="${Y(v)+5}" font-size="14" text-anchor="end" fill="${muted}">${eur(v)}</text>`; });
+  const perm = Math.max(0, r.nofMin);
+  r.rows.forEach((x,i) => {
+    const xx = L + i*bw + bw*0.15, ww = bw*0.7;
+    const p = Math.min(x.nof, perm);
+    g += `<rect x="${xx}" y="${Y(p)}" width="${ww}" height="${Y(0)-Y(p)}" fill="${ink}"/>`;
+    if (x.nof > perm) g += `<rect x="${xx}" y="${Y(x.nof)}" width="${ww}" height="${Y(perm)-Y(x.nof)}" fill="${teal}"/>`;
+    g += `<text x="${xx+ww/2}" y="${B+22}" font-size="14" text-anchor="middle" fill="${muted}">${MESES[i][0]}</text>`;
+  });
+  g += `<line x1="${L}" x2="${W-R}" y1="${Y(0)}" y2="${Y(0)}" stroke="${ink}"/>`;
+  g += `<text x="${(L+W-R)/2}" y="${H-4}" font-size="14" text-anchor="middle" fill="${muted}">Permanentes: ${eur(perm)} · Estacionales: hasta ${eur(r.nofMax-perm)}</text>`;
+  document.getElementById('nof').innerHTML = g;
+}
+
+function drawWhy(r, s){
+  const w = [];
+  w.push(`Desfase entre cobros y pagos: se cobra a ${fmt(s.pmc)} días, el material está ${fmt(s.pme)} días en almacén y se paga a ${fmt(s.pmp)} días. El ciclo de caja es de <b>${fmt(r.ciclo)} días</b>: ${r.ciclo>0 ? 'la empresa adelanta ese tiempo de actividad con su propio dinero' : 'los proveedores financian la operativa'}.`);
+  w.push(`Las NOF oscilan entre ${eur(r.nofMin)} y ${eur(r.nofMax)}. La parte permanente (${eur(Math.max(0,r.nofMin))}) debería financiarse con recursos a largo plazo, es decir, con fondo de maniobra; la parte estacional (${eur(r.nofMax-Math.max(0,r.nofMin))}) es la que justifica una póliza, descuento comercial, factoring o confirming.`);
+  if (s.intens>0 && s.perfil!=='plana') w.push(`La estacionalidad concentra ventas en unos meses, pero los pagos a proveedores y el almacén se adelantan a la campaña, y los cobros llegan después: la caja cae justo antes y durante la temporada alta.`);
+  w.push(`Las pagas extra de junio y diciembre suponen ${eur(s.personal/14)} adicionales en cada uno de esos meses.`);
+  if (s.iva) w.push(`El IVA agrava el desfase: se factura con IVA, pero se cobra a ${fmt(s.pmc)} días, y se liquida a Hacienda en enero, abril, julio y octubre. En esos meses la empresa paga IVA de ventas que en parte aún no ha cobrado.`);
+  if (r.isCash>0) w.push(`El impuesto sobre beneficios (${eur(r.isCash)}) se paga de una vez en julio, en plena campaña.`);
+  if (s.div>0) w.push(`Los dividendos de ${eur(s.div)} en ${MESES_L[s.divMes]} salen de la caja, no del beneficio: si coinciden con meses de tensión, aumentan la necesidad de póliza.`);
+  if (s.ampl>0) w.push(`La ampliación de capital de ${eur(s.ampl)} en ${MESES_L[s.amplMes]} refuerza la tesorería y el fondo de maniobra: es financiación permanente, adecuada para las NOF permanentes.`);
+  if (s.inv>0) w.push(`La inversión de ${eur(s.inv)} se paga de una vez en ${MESES_L[s.invMes]}, aunque se amortice en varios años: es el caso típico de inversión a largo que no debería financiarse con la póliza.`);
+  if (s.crec>0) w.push(`Crecer un ${pct(s.crec,0)} aumenta las NOF en ${eur(r.dNof)}: vender más exige financiar más clientes y más existencias antes de cobrar.`);
+  if (s.crec<0) w.push(`Las ventas caen un ${pct(-s.crec,0)} y las NOF bajan en ${eur(-r.dNof)}: el circulante libera caja, aunque el negocio se reduzca.`);
+  if (r.necMax>0) w.push(r.deficit>0.5 ? `La póliza de ${eur(s.limite)} se queda corta: habría que ampliarla, negociar plazos o anticipar cobros (descuento, factoring).` : `La póliza se usa hasta ${eur(r.usoMax)} (${pct(s.limite? r.usoMax/s.limite*100 : 0,0)} del límite) y cuesta ${eur(r.intTot)} de intereses en el año.`);
+  document.getElementById('why').innerHTML = w.map(x=>`<li>${x}</li>`).join('');
+}
+
+function drawMonth(r, s){
+  const lines = [
+    ['Ventas del mes (sin IVA)', x=>x.v],
+    ['Cobros de clientes', x=>x.cobros],
+    ['− Pagos a proveedores', x=>-x.pagosProv],
+    ['− Personal', x=>-x.personal],
+    ['− Otros gastos fijos', x=>-x.otros],
+    ...(s.iva ? [['− Liquidación de IVA', x=>-x.liqIVA]] : []),
+    ['− Impuesto sobre BAII', x=>-x.isPago],
+    ['− Inversión', x=>-x.invP],
+    ['= FCO (flujo de caja operativo)', x=>x.fco, 't'],
+    ['− Intereses del préstamo a largo', x=>-x.intLP],
+    ['− Principal del préstamo a largo', x=>-x.princ],
+    ['+ Ahorro fiscal por intereses', x=>x.escudoM],
+    ['− Intereses de la póliza', x=>-x.interes],
+    ['+ Disposición / − devolución de póliza', x=>x.dDisp],
+    ['= FCA (flujo de caja del accionista)', x=>x.fca, 't'],
+    ['− Dividendos', x=>-x.divM],
+    ['+ Ampliación de capital', x=>x.amplM],
+    ['= Variación de tesorería', x=>x.vt, 't'],
+    ['Tesorería al final del mes', x=>x.saldo, 't'],
+    ['Tesorería sin financiación a corto', x=>x.sinPol],
+    ['Póliza dispuesta', x=>x.disp],
+    ['NOF al final del mes', x=>x.nof]
+  ];
+  let h = '<thead><tr><th>Euros</th>' + MESES.map(m=>`<th>${m}</th>`).join('') + '</tr></thead><tbody>';
+  lines.forEach(([l,fn,cls]) => { h += `<tr class="${cls||''}"><td>${l}</td>` + r.rows.map(x=>{ const v=fn(x); return `<td class="${v<-0.5?'neg':''}">${fmt(v)}</td>`; }).join('') + '</tr>'; });
+  document.getElementById('month').innerHTML = h + '</tbody>';
+}
+
+function load(){ ids.forEach(k => { const el=document.getElementById(k); if (k==='iva') el.checked = INI[k]; else el.value = INI[k]; }); update(); }
+f.addEventListener('input', update);
+f.addEventListener('change', update);
+document.getElementById('reset').addEventListener('click', load);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', update);
+new MutationObserver(update).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+load();
+</script>
+</body>
+</html>
