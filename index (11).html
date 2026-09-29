@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulador de tesorería y fuentes de financiación</title>
+<meta name="description" content="Simulador docente de presupuesto de tesorería: NOF, FCO, FCA, IVA, impuestos, póliza de crédito y necesidad de financiación y comparación de fuentes: póliza, préstamos, factoring, confirming, crowdlending, crowdfunding y ampliación de capital.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💶</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#06323c; --teal:#00a3ae; --teal-soft:#dff2f3; --paper:#ffffff; --ground:#f3f6f6;
+  --line:#d3dfe0; --muted:#4f6970; --out:#c0392b; --out-soft:#f8e3e0; --in:#00838c; --warn:#b7791f; --ok:#1f7a55;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --ink:#e4f2f3; --teal:#2cc4ce; --teal-soft:#123c43; --paper:#0d2328; --ground:#081a1e;
+  --line:#23434a; --muted:#9bb5ba; --out:#f07a6c; --out-soft:#3b1f1c; --in:#46cbd3; --warn:#e2ad4f; --ok:#5cc596;
+}}
+:root[data-theme="dark"]{
+  --ink:#e4f2f3; --teal:#2cc4ce; --teal-soft:#123c43; --paper:#0d2328; --ground:#081a1e;
+  --line:#23434a; --muted:#9bb5ba; --out:#f07a6c; --out-soft:#3b1f1c; --in:#46cbd3; --warn:#e2ad4f; --ok:#5cc596;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0; background:var(--ground); color:var(--ink); font-family:Archivo,"Helvetica Neue",Arial,sans-serif; font-size:16px; line-height:1.45; font-variant-numeric:tabular-nums}
+.wrap{max-width:1360px; margin:0 auto; padding:28px 24px 48px}
+header{display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:22px}
+h1{font-stretch:75%; font-weight:800; font-size:clamp(32px,4.6vw,54px); line-height:.98; margin:0}
+.sub{margin:10px 0 0; color:var(--muted); max-width:72ch}
+.reset{font:inherit; font-size:15px; border:1.5px solid var(--ink); background:transparent; color:var(--ink); padding:9px 18px; border-radius:999px; cursor:pointer}
+.reset:hover{background:var(--ink); color:var(--paper)}
+.reset.primary{background:var(--ink); color:var(--paper)}
+.btns{display:flex; flex-wrap:wrap; gap:8px}
+.numwrap{display:inline-flex; align-items:center; gap:6px; justify-self:end}
+.numwrap input{font:inherit; font-weight:700; font-size:15px; width:132px; text-align:right; padding:4px 8px; border:1px solid var(--line); border-radius:4px; background:var(--paper); color:var(--ink)}
+.numwrap input:focus{border-color:var(--teal)}
+.numwrap .unit{font-size:13.5px; color:var(--muted); min-width:34px}
+.row{grid-template-columns:1fr auto !important}
+button:focus-visible, input:focus-visible, select:focus-visible{outline:3px solid var(--teal); outline-offset:2px}
+.grid{display:grid; grid-template-columns:minmax(300px,370px) 1fr; gap:24px; align-items:start}
+@media (max-width:960px){.grid{grid-template-columns:1fr}}
+.controls{background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:6px 20px 14px}
+fieldset{border:0; padding:14px 0 6px; margin:0; border-bottom:1px solid var(--line)}
+fieldset:last-child{border-bottom:0}
+legend{font-stretch:80%; font-weight:750; font-size:19px; padding:0; margin-bottom:4px}
+.hint{font-size:13.5px; color:var(--muted); margin:2px 0 6px}
+.row{display:grid; grid-template-columns:1fr auto; gap:2px 12px; align-items:baseline; margin:10px 0}
+.row label{font-size:14.5px}
+.row output{font-weight:700; font-size:15px; white-space:nowrap}
+.row input[type=range]{grid-column:1 / -1; width:100%; accent-color:var(--teal)}
+.row.chk{display:block; font-size:14.5px}
+.row.chk input{accent-color:var(--teal); width:18px; height:18px; vertical-align:-3px; margin-right:6px}
+.row select{grid-column:1 / -1; font:inherit; font-size:15px; padding:6px 8px; border:1px solid var(--line); border-radius:4px; background:var(--paper); color:var(--ink)}
+.derived{background:var(--teal-soft); border-radius:6px; padding:10px 12px; margin:10px 0 4px; font-size:14px}
+.derived table{width:100%; border-collapse:collapse}
+.derived td{padding:2px 0}
+.derived td:last-child{text-align:right; font-weight:600; white-space:nowrap}
+.derived tr.t td{border-top:1.5px solid var(--ink); font-weight:800; padding-top:4px}
+.panel{display:flex; flex-direction:column; gap:20px; min-width:0}
+.hero{background:#06323c; color:#fff; border-radius:6px; padding:22px 26px}
+.hero p{margin:0; font-size:19px; line-height:1.5; max-width:78ch}
+.hero b{color:#6fe0e7}
+.hero .bad{color:#ff9d90}
+.kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:6px; overflow:hidden}
+.kpi{background:var(--paper); padding:14px 16px}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi .n{font-size:14px; color:var(--muted)}
+.kpi .v{font-stretch:78%; font-weight:800; font-size:30px; line-height:1.1; margin:2px 0}
+.kpi .d{font-size:13.5px; font-weight:600}
+.card{background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:18px 20px}
+.card h2{font-stretch:80%; font-size:23px; margin:0 0 4px; font-weight:750}
+.card p.note{margin:0 0 12px; color:var(--muted); font-size:14.5px; max-width:80ch}
+.scroll{overflow-x:auto}
+svg text{font-family:Archivo,Arial,sans-serif}
+.legend{display:flex; flex-wrap:wrap; gap:16px; font-size:14px; color:var(--muted); margin-top:6px}
+.legend i{display:inline-block; width:22px; height:4px; vertical-align:middle; margin-right:6px; border-radius:2px}
+.two{display:grid; grid-template-columns:1fr 1fr; gap:20px}
+@media (max-width:1150px){.two{grid-template-columns:1fr}}
+table.bridge{width:100%; border-collapse:collapse; font-size:15.5px}
+table.bridge td{padding:7px 0; border-bottom:1px solid var(--line)}
+table.bridge td:last-child{text-align:right; font-weight:650; white-space:nowrap}
+table.bridge tr.t td{font-weight:800; border-bottom:0; border-top:2px solid var(--ink)}
+table.month{border-collapse:collapse; font-size:14px; min-width:1100px; width:100%}
+table.month th, table.month td{padding:6px 8px; text-align:right; white-space:nowrap; border-bottom:1px solid var(--line)}
+table.month th:first-child, table.month td:first-child{text-align:left; position:sticky; left:0; background:var(--paper)}
+table.month thead th{color:var(--muted); font-weight:600; border-bottom:2px solid var(--ink)}
+table.month tr.t td{font-weight:800}
+table.month td.neg{color:var(--out)}
+.why{margin:0; padding-left:20px}
+.why li{margin:7px 0; max-width:80ch}
+footer{margin-top:26px; color:var(--muted); font-size:13.5px; max-width:100ch}
+.pos{color:var(--ok)} .neg{color:var(--out)}
+
+details.grp{border-bottom:1px solid var(--line); padding:12px 0}
+details.grp:last-of-type{border-bottom:0}
+details.grp > summary{cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:10px; font-stretch:80%; font-weight:750; font-size:19px}
+details.grp > summary::-webkit-details-marker{display:none}
+details.grp > summary::after{content:'+'; font-weight:600; font-size:22px; color:var(--muted)}
+details.grp[open] > summary::after{content:'−'}
+details.src{border:1px solid var(--line); border-radius:6px; margin:8px 0; padding:0 12px}
+details.src > summary{cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:8px; padding:10px 0; font-weight:650; font-size:15px}
+details.src > summary::-webkit-details-marker{display:none}
+details.src.on{border-color:var(--teal); background:var(--teal-soft)}
+.badge{font-size:12px; font-weight:700; padding:2px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted); white-space:nowrap}
+details.src.on .badge{background:var(--teal); color:#fff; border-color:var(--teal)}
+fieldset.params{border:0; padding:0 0 8px; margin:0}
+fieldset.params:disabled{opacity:.45}
+.subhead{font-size:14px; color:var(--muted); margin:14px 0 2px; font-weight:700; text-transform:uppercase; letter-spacing:.04em}
+table.src{border-collapse:collapse; font-size:14.5px; width:100%; min-width:1080px}
+table.src th:nth-child(1){width:15%} table.src th:nth-child(2){width:14%} table.src th:nth-child(3){width:12%} table.src th:nth-child(4){width:19%} table.src th:nth-child(5){width:19%} table.src th:nth-child(6){width:21%}
+table.src th, table.src td{padding:8px 10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top}
+table.src th{color:var(--muted); font-weight:600; border-bottom:2px solid var(--ink)}
+table.src td.n{text-align:right; white-space:nowrap; font-weight:650}
+table.src tr.warn td{background:var(--out-soft)}
+table.bal{border-collapse:collapse; width:100%; font-size:15px; min-width:560px}
+table.bal th, table.bal td{padding:6px 8px; border-bottom:1px solid var(--line); text-align:right; white-space:nowrap}
+table.bal th:first-child, table.bal td:first-child{text-align:left; white-space:normal}
+table.bal thead th{color:var(--muted); font-weight:600; border-bottom:2px solid var(--ink)}
+table.bal tr.g td{font-weight:750; color:var(--muted); font-size:13.5px; padding-top:14px; border-bottom:0}
+table.bal tr.t td{font-weight:800; border-top:2px solid var(--ink)}
+table.bal tr.hl td{background:var(--teal-soft)}
+.ratios{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px}
+.ratio .name{font-size:14.5px; color:var(--muted)}
+.ratio .val{font-stretch:75%; font-weight:800; font-size:38px; line-height:1.05}
+.meter{height:10px; border-radius:5px; overflow:hidden; display:flex; margin-top:8px}
+.meter span{display:block; height:100%}
+.meter-wrap{position:relative; padding-top:4px}
+.pin{position:absolute; top:0; width:3px; height:18px; background:var(--ink); border-radius:2px; transform:translateX(-1px)}
+.scale{position:relative; height:18px; font-size:12.5px; color:var(--muted); margin-top:4px}
+.scale span{position:absolute; transform:translateX(-50%); white-space:nowrap}
+.scale span:first-child{transform:none}
+.scale span:last-child{transform:translateX(-100%)}
+.guide{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px}
+.gcard{border:1px solid var(--line); border-radius:6px; padding:14px 16px; font-size:14.5px}
+.gcard h3{margin:0 0 6px; font-size:17px; font-weight:750}
+.gcard p{margin:0 0 6px}
+.gcard ul{margin:4px 0 6px; padding-left:18px}
+.gcard .tag{display:inline-block; font-size:12px; font-weight:700; color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:1px 8px; margin-bottom:6px}
+.gcard.on{border:2px solid var(--teal)}
+.gcard.alert{border:2px solid var(--out); background:var(--out-soft)}
+.gcard.wide{grid-column:1 / -1}
+.why li.bad{color:var(--out)}
+
+.tabs{display:flex; gap:4px; border-bottom:2px solid var(--ink); margin:0 0 22px}
+.tabs button{font:inherit; font-weight:700; font-size:16px; padding:10px 18px; border:1px solid var(--line); border-bottom:0; border-radius:6px 6px 0 0; background:var(--paper); color:var(--muted); cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+.lab-grid{display:grid; grid-template-columns:minmax(300px,370px) 1fr; gap:24px; align-items:start}
+@media (max-width:960px){.lab-grid{grid-template-columns:1fr}}
+.lab-form label{display:block; font-size:14.5px; margin:10px 0 4px}
+.lab-form select, .lab-form input{font:inherit; font-size:15px; width:100%; padding:7px 9px; border:1px solid var(--line); border-radius:4px; background:var(--paper); color:var(--ink)}
+.lab-form input.r{text-align:right; font-weight:700}
+.lab-form .pair{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.lab-form .go{margin-top:14px; width:100%; font:inherit; font-weight:750; padding:10px; border:0; border-radius:6px; background:var(--teal); color:#fff; cursor:pointer}
+.lab-form .sec{display:flex; gap:8px; margin-top:8px}
+.lab-form .sec button{flex:1; font:inherit; font-size:14px; padding:8px; border:1.5px solid var(--ink); border-radius:6px; background:transparent; color:var(--ink); cursor:pointer}
+.opmsg{border-radius:6px; padding:14px 16px; font-size:15.5px; line-height:1.5; background:var(--teal-soft)}
+.opmsg.err{background:var(--out-soft); color:var(--out)}
+.balcols{display:grid; grid-template-columns:1fr 1fr; gap:20px}
+@media (max-width:700px){.balcols{grid-template-columns:1fr}}
+table.lb{width:100%; border-collapse:collapse; font-size:15px}
+table.lb th, table.lb td{padding:7px 6px; border-bottom:1px solid var(--line); text-align:right; white-space:nowrap}
+table.lb th:first-child, table.lb td:first-child{text-align:left; white-space:normal}
+table.lb thead th{color:var(--muted); font-weight:600; border-bottom:2px solid var(--ink)}
+table.lb tr.t td{font-weight:800; border-top:2px solid var(--ink)}
+table.lb td.up{color:var(--ok); font-weight:700} table.lb td.dn{color:var(--out); font-weight:700}
+table.lb tr.chg td{background:var(--teal-soft)}
+.inds{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:6px; overflow:hidden; margin-top:16px}
+.ind{background:var(--paper); padding:12px 14px}
+.ind .n{font-size:13.5px; color:var(--muted)} .ind .v{font-stretch:78%; font-weight:800; font-size:26px} .ind .d{font-size:13px; font-weight:650}
+.hist{margin:0; padding-left:20px; font-size:14.5px} .hist li{margin:4px 0}
+.identity{margin-top:12px; font-size:15px; background:var(--ground); border-radius:6px; padding:10px 14px}
+
+table.bform td input{font:inherit; font-size:15px; font-weight:700; width:140px; text-align:right; padding:5px 8px; border:1px solid var(--line); border-radius:4px; background:var(--paper); color:var(--ink)}
+table.lb tr.h td{font-weight:800; font-size:13.5px; text-transform:uppercase; letter-spacing:.03em; color:var(--muted); padding-top:14px; border-bottom:0}
+table.lb tr.s td{font-weight:750; background:var(--ground)}
+table.lb td.ind1{padding-left:18px}
+.identity.bad{background:var(--out-soft); color:var(--out); font-weight:650}
+.identity.good{background:var(--teal-soft)}
+.reset:disabled{opacity:.4; cursor:not-allowed}
+.balcols{align-items:start}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Liquidez y financiación a corto plazo: simulador docente</h1>
+      <p class="sub">Dos herramientas: el presupuesto de tesorería mes a mes, con las distintas fuentes de financiación, y un laboratorio para ver cómo cada operación y cada plazo mueven el balance y la tesorería.</p>
+    </div>
+    <div class="btns"><button class="reset" id="blank" type="button">Empezar en blanco</button><button class="reset" id="example" type="button">Cargar empresa de ejemplo</button><button class="reset primary" id="setref" type="button">Guardar como referencia</button></div>
+  </header>
+  <nav class="tabs" role="tablist"><button role="tab" id="tabPres" aria-selected="true">Presupuesto de tesorería y financiación</button><button role="tab" id="tabLab" aria-selected="false">Laboratorio del balance</button></nav>
+  <div id="viewPres">
+  <div class="grid">
+
+<form class="controls" id="f" onsubmit="return false">
+ <details class="grp" open><summary>Negocio</summary>
+  <div class="row"><label for="ventas">Ventas del año</label><output for="ventas"></output><input type="range" id="ventas"></div><div class="row"><label for="crec">Crecimiento de las ventas en el año</label><output for="crec"></output><input type="range" id="crec"></div>
+  <div class="row"><label for="perfil">Estacionalidad</label><select id="perfil"><option value="plana">Ventas planas todo el año</option><option value="verano">Campaña de verano</option><option value="final">Campaña de final de año</option></select></div>
+  <div class="row"><label for="intens">Intensidad de la estacionalidad</label><output for="intens"></output><input type="range" id="intens"></div>
+  <div class="row"><label for="compras">Compras de materiales</label><output for="compras"></output><input type="range" id="compras"></div><div class="row"><label for="personal">Gastos de personal anuales (14 pagas)</label><output for="personal"></output><input type="range" id="personal"></div><div class="row"><label for="otros">Otros gastos fijos anuales</label><output for="otros"></output><input type="range" id="otros"></div>
+  <div class="derived" aria-live="polite"><table id="ebitdaCalc"></table></div>
+ </details>
+ <details class="grp"><summary>Plazos del circulante</summary>
+  <div class="row"><label for="pmc">Plazo de cobro a clientes</label><output for="pmc"></output><input type="range" id="pmc"></div><div class="row"><label for="pme">Existencias en almacén</label><output for="pme"></output><input type="range" id="pme"></div><div class="row"><label for="pmp">Plazo de pago a proveedores</label><output for="pmp"></output><input type="range" id="pmp"></div>
+  <div class="row chk"><label for="cambio"><input type="checkbox" id="cambio"> Los plazos han cambiado respecto al año anterior</label></div>
+  <p class="hint">Márcalo para ver el año de transición: los saldos de partida se calculan con los plazos anteriores. Sin marcar, se supone que la empresa siempre ha trabajado con estos plazos.</p>
+  <fieldset class="params" id="p_prev"><div class="row"><label for="pmc0">Cobro a clientes el año anterior</label><output for="pmc0"></output><input type="range" id="pmc0"></div><div class="row"><label for="pme0">Existencias el año anterior</label><output for="pme0"></output><input type="range" id="pme0"></div><div class="row"><label for="pmp0">Pago a proveedores el año anterior</label><output for="pmp0"></output><input type="range" id="pmp0"></div></fieldset>
+ </details>
+ <details class="grp"><summary>Inversión, deuda actual e impuestos</summary>
+  <div class="row"><label for="inv">Inversión en maquinaria (sin IVA)</label><output for="inv"></output><input type="range" id="inv"></div><div class="row"><label for="invMes">Mes de pago de la inversión</label><select id="invMes"></select></div>
+  <div class="row"><label for="deudaLP">Préstamo a largo que ya tiene la empresa</label><output for="deudaLP"></output><input type="range" id="deudaLP"></div><div class="row"><label for="tipoLP">Tipo de interés de ese préstamo</label><output for="tipoLP"></output><input type="range" id="tipoLP"></div><div class="row"><label for="plazoLP">Plazo pendiente de ese préstamo</label><output for="plazoLP"></output><input type="range" id="plazoLP"></div>
+  <p class="hint" id="cuotaTxt"></p>
+  <div class="row"><label for="amort">Amortización anual</label><output for="amort"></output><input type="range" id="amort"></div><div class="row"><label for="tasaIS">Tipo del impuesto sobre beneficios</label><output for="tasaIS"></output><input type="range" id="tasaIS"></div>
+  <div class="row chk"><label for="iva"><input type="checkbox" id="iva"> Incluir IVA del 21 % (liquidación trimestral; mensual si las ventas superan 6.010.121,04 €)</label></div>
+ </details>
+ <details class="grp"><summary>Balance a 1 de enero</summary>
+  <p class="hint">Por defecto, los saldos de partida se calculan a partir de las ventas, los costes y los plazos del año anterior. Márcalo para escribir tu balance real de apertura; la tesorería inicial y el préstamo a largo se introducen en sus apartados.</p>
+  <div class="row chk"><label for="manual"><input type="checkbox" id="manual"> Introducir el balance de apertura a mano</label></div>
+  <fieldset class="params" id="p_ini"><div class="row"><label for="iniExi">Existencias (sin IVA)</label><output for="iniExi"></output><input type="range" id="iniExi"></div><div class="row"><label for="iniCli">Clientes (con IVA)</label><output for="iniCli"></output><input type="range" id="iniCli"></div><div class="row"><label for="iniProv">Proveedores (con IVA)</label><output for="iniProv"></output><input type="range" id="iniProv"></div><div class="row"><label for="iniIVA">IVA pendiente de liquidar</label><output for="iniIVA"></output><input type="range" id="iniIVA"></div><div class="row"><label for="iniIS">Impuesto sobre beneficios del año anterior pendiente</label><output for="iniIS"></output><input type="range" id="iniIS"></div><div class="row"><label for="polIni">Póliza de crédito (línea de crédito) dispuesta</label><output for="polIni"></output><input type="range" id="polIni"></div><p class="hint">Los clientes y proveedores de partida se cobran y pagan según sus plazos; la diferencia con los saldos que corresponderían a esos plazos se regulariza en enero. El IVA pendiente se liquida en enero y el impuesto, en julio.</p></fieldset>
+ </details>
+ <details class="grp"><summary>Caja y accionistas</summary>
+  <div class="row"><label for="tes0">Tesorería al 1 de enero</label><output for="tes0"></output><input type="range" id="tes0"></div><div class="row"><label for="minimo">Saldo mínimo de seguridad</label><output for="minimo"></output><input type="range" id="minimo"></div>
+  <div class="row"><label for="div">Dividendos</label><output for="div"></output><input type="range" id="div"></div><div class="row"><label for="divMes">Mes de pago de los dividendos</label><select id="divMes"></select></div>
+ </details>
+ <details class="grp" open><summary>Fuentes de financiación</summary>
+  <p class="hint">Actívalas y ajusta sus condiciones. Cada una muestra su efecto en la caja, en el balance y en el coste.</p>
+  <p class="subhead">Bancarias a corto plazo</p>
+  <details class="src" id="d_pol"><summary><span>Póliza de crédito (línea de crédito)</span><span class="badge" id="b_pol">Desactivada</span></summary><div class="row chk"><label for="pol"><input type="checkbox" id="pol"> Usar esta fuente</label></div><fieldset class="params" id="p_pol"><div class="row"><label for="limite">Límite de la póliza</label><output for="limite"></output><input type="range" id="limite"></div><div class="row"><label for="tipo">Tipo de interés</label><output for="tipo"></output><input type="range" id="tipo"></div><div class="row"><label for="polAper">Comisión de apertura (sobre el límite)</label><output for="polAper"></output><input type="range" id="polAper"></div><div class="row"><label for="polND">Comisión de no disponibilidad (anual)</label><output for="polND"></output><input type="range" id="polND"></div></fieldset></details>
+  <details class="src" id="d_cp"><summary><span>Préstamo bancario a corto plazo</span><span class="badge" id="b_cp">Desactivada</span></summary><div class="row chk"><label for="cp"><input type="checkbox" id="cp"> Usar esta fuente</label></div><fieldset class="params" id="p_cp"><div class="row"><label for="cpImp">Importe</label><output for="cpImp"></output><input type="range" id="cpImp"></div><div class="row"><label for="cpMes">Mes de entrada</label><select id="cpMes"></select></div><div class="row"><label for="cpTipo">Tipo de interés</label><output for="cpTipo"></output><input type="range" id="cpTipo"></div><div class="row"><label for="cpPlazo">Plazo</label><output for="cpPlazo"></output><input type="range" id="cpPlazo"></div><div class="row"><label for="cpModo">Devolución</label><select id="cpModo"><option value="bullet">Todo al vencimiento</option><option value="cuotas">Cuotas mensuales</option></select></div></fieldset></details>
+  <details class="src" id="d_fac"><summary><span>Factoring (anticipo de facturas)</span><span class="badge" id="b_fac">Desactivada</span></summary><div class="row chk"><label for="fac"><input type="checkbox" id="fac"> Usar esta fuente</label></div><fieldset class="params" id="p_fac"><div class="row"><label for="facPct">Facturación cedida al factor</label><output for="facPct"></output><input type="range" id="facPct"></div><div class="row"><label for="facCom">Comisión sobre cada factura</label><output for="facCom"></output><input type="range" id="facCom"></div><div class="row"><label for="facTipo">Interés por los días anticipados</label><output for="facTipo"></output><input type="range" id="facTipo"></div><div class="row"><label for="facMes">Desde el mes</label><select id="facMes"></select></div></fieldset></details>
+  <details class="src" id="d_conf"><summary><span>Confirming</span><span class="badge" id="b_conf">Desactivada</span></summary><div class="row chk"><label for="conf"><input type="checkbox" id="conf"> Usar esta fuente</label></div><fieldset class="params" id="p_conf"><p class="hint">Servicio de gestión de pagos a proveedores. Actívalo para comprobar su efecto en tu caja.</p></fieldset></details>
+  <p class="subhead">A largo plazo y alternativas</p>
+  <details class="src" id="d_lp"><summary><span>Préstamo bancario a largo plazo</span><span class="badge" id="b_lp">Desactivada</span></summary><div class="row chk"><label for="lp"><input type="checkbox" id="lp"> Usar esta fuente</label></div><fieldset class="params" id="p_lp"><div class="row"><label for="lpImp">Importe</label><output for="lpImp"></output><input type="range" id="lpImp"></div><div class="row"><label for="lpMes">Mes de entrada</label><select id="lpMes"></select></div><div class="row"><label for="lpTipo">Tipo de interés</label><output for="lpTipo"></output><input type="range" id="lpTipo"></div><div class="row"><label for="lpPlazo">Plazo</label><output for="lpPlazo"></output><input type="range" id="lpPlazo"></div><div class="row"><label for="lpCom">Comisión de apertura</label><output for="lpCom"></output><input type="range" id="lpCom"></div></fieldset></details>
+  <details class="src" id="d_cl"><summary><span>Crowdlending (préstamo vía plataforma)</span><span class="badge" id="b_cl">Desactivada</span></summary><div class="row chk"><label for="cl"><input type="checkbox" id="cl"> Usar esta fuente</label></div><fieldset class="params" id="p_cl"><div class="row"><label for="clImp">Importe</label><output for="clImp"></output><input type="range" id="clImp"></div><div class="row"><label for="clMes">Mes de entrada</label><select id="clMes"></select></div><div class="row"><label for="clTipo">Tipo de interés</label><output for="clTipo"></output><input type="range" id="clTipo"></div><div class="row"><label for="clPlazo">Plazo</label><output for="clPlazo"></output><input type="range" id="clPlazo"></div><div class="row"><label for="clCom">Comisión de la plataforma</label><output for="clCom"></output><input type="range" id="clCom"></div></fieldset></details>
+  <p class="subhead">Capital</p>
+  <details class="src" id="d_cf"><summary><span>Crowdfunding de capital (crowdequity)</span><span class="badge" id="b_cf">Desactivada</span></summary><div class="row chk"><label for="cf"><input type="checkbox" id="cf"> Usar esta fuente</label></div><fieldset class="params" id="p_cf"><div class="row"><label for="cfImp">Importe captado</label><output for="cfImp"></output><input type="range" id="cfImp"></div><div class="row"><label for="cfMes">Mes de desembolso</label><select id="cfMes"></select></div><div class="row"><label for="cfPre">Valoración de la empresa antes de la ronda</label><output for="cfPre"></output><input type="range" id="cfPre"></div><div class="row"><label for="cfCom">Comisión de la plataforma</label><output for="cfCom"></output><input type="range" id="cfCom"></div></fieldset></details>
+  <details class="src" id="d_ak"><summary><span>Ampliación de capital</span><span class="badge" id="b_ak">Desactivada</span></summary><div class="row chk"><label for="ak"><input type="checkbox" id="ak"> Usar esta fuente</label></div><fieldset class="params" id="p_ak"><div class="row"><label for="akImp">Importe</label><output for="akImp"></output><input type="range" id="akImp"></div><div class="row"><label for="akMes">Mes de desembolso</label><select id="akMes"></select></div><div class="row"><label for="akPre">Valoración de la empresa antes de la ampliación</label><output for="akPre"></output><input type="range" id="akPre"></div><div class="row"><label for="akMot">Motivo de la ampliación</label><select id="akMot"><option value="oportunidad">Gran oportunidad de inversión o crecimiento</option><option value="asfixia">Asfixia financiera sin acceso a crédito</option><option value="startup">Empresa joven sin historial crediticio</option><option value="puntual">Cubrir un desfase puntual de caja (nóminas, un cliente que falla)</option></select></div></fieldset></details>
+ </details>
+</form>
+<div class="panel">
+  <section class="hero" aria-live="polite"><p id="msg"></p></section>
+  <section class="kpis" id="kpis" aria-label="Indicadores y cambio respecto a la situación inicial"></section>
+  <section class="card">
+    <h2>Tesorería mes a mes</h2>
+    <p class="note">Saldo al final de cada mes. La zona roja es el hueco que queda por cubrir tras las fuentes activadas; las barras, lo dispuesto de la póliza.</p>
+    <div class="scroll"><svg id="cash" viewBox="0 0 1000 440" width="100%" role="img" aria-label="Evolución mensual de la tesorería"></svg></div>
+    <div class="legend">
+      <span><i style="background:var(--out)"></i>Sin financiación adicional</span>
+      <span><i style="background:var(--muted)"></i>Con las fuentes activadas, sin póliza</span>
+      <span><i style="background:var(--ink)"></i>Saldo final</span>
+      <span><i style="background:var(--warn)"></i>Saldo mínimo</span>
+      <span><i style="background:var(--teal)"></i>Póliza (línea de crédito) dispuesta</span>
+    </div>
+  </section>
+  <section class="card">
+    <h2>Fuentes de financiación: qué aportan y cuánto cuestan</h2>
+    <p class="note">Solo aparecen las fuentes activadas y la deuda que ya tenía la empresa. El coste es el del año simulado.</p>
+    <div class="scroll"><table class="src" id="srcTable"></table></div>
+  </section>
+  <section class="card">
+      <h2>Circulante y financiación en el balance</h2>
+      <p class="note">Saldos a 1 de enero y a 31 de diciembre. Clientes y proveedores, con IVA. La deuda a largo se muestra completa como no corriente.</p>
+      <div class="scroll"><table class="bal" id="balance"></table></div>
+    </section>
+    <section class="card">
+      <h2>Viabilidad financiera</h2>
+      <p class="note">Referencias: RCSD y RCSD ajustado de al menos 1,5; Deuda neta/EBITDA en alerta por encima de 2,5-3.</p>
+      <div class="ratios" id="ratios"></div>
+    </section>
+  <section class="card">
+    <h2>FCO y FCA mes a mes</h2>
+    <p class="note">FCO: lo que genera la operativa tras pagar proveedores, personal, gastos, impuestos e inversiones. FCA: lo que queda tras la deuda y la financiación nueva. Variación de tesorería = FCA − dividendos + aportaciones de capital.</p>
+    <div class="scroll"><svg id="flujos" viewBox="0 0 1000 330" width="100%" role="img" aria-label="FCO y FCA mensuales"></svg></div>
+    <div class="legend"><span><i style="background:var(--ink)"></i>FCO</span><span><i style="background:var(--teal)"></i>FCA</span></div>
+  </section>
+  <div class="two">
+    <section class="card">
+      <h2>Del EBITDA al FCO y al FCA</h2>
+      <p class="note">El EBITDA no es caja: las NOF, los impuestos y la inversión lo separan del FCO; la financiación, del FCA.</p>
+      <table class="bridge" id="bridge"></table>
+    </section>
+    <section class="card">
+      <h2>Necesidades operativas de fondos</h2>
+      <p class="note">NOF = clientes + existencias − proveedores, sin IVA, al final de cada mes. La parte permanente pide financiación a largo; la estacional, a corto.</p>
+      <div class="scroll"><svg id="nof" viewBox="0 0 560 320" width="100%" role="img" aria-label="NOF mensuales"></svg></div>
+      <div class="legend"><span><i style="background:var(--ink)"></i>NOF permanentes</span><span><i style="background:var(--teal)"></i>NOF estacionales</span></div>
+    </section>
+  </div>
+  <section class="card">
+    <h2>Qué está pasando</h2>
+    <ul class="why" id="why"></ul>
+  </section>
+  <section class="card">
+    <h2>Guía de fuentes de financiación</h2>
+    <p class="note">Las fuentes activadas se resaltan.</p>
+    <div class="guide" id="guide"></div>
+  </section>
+  <section class="card">
+    <h2>Presupuesto de tesorería</h2>
+    <p class="note">Cobros y pagos de cada mes, en euros.</p>
+    <div class="scroll"><table class="month" id="month"></table></div>
+  </section>
+</div>
+  </div>
+  <footer>Modelo docente simplificado. Meses de 30 días. FCO = cobros − pagos operativos − liquidaciones de IVA − impuesto sobre BAII − inversiones. FCA = FCO − intereses · (1 − t) − principal + entradas de deuda − costes financieros. Variación de tesorería = FCA − dividendos + aportaciones de capital. El impuesto de julio se estima con el resultado del año; los intereses y comisiones de préstamos, crowdlending y factoring reducen la base, los de la póliza no. Factoring sin recurso: el factor adelanta la factura completa con IVA y cobra comisión más interés por los días anticipados. IVA del 21 % en ventas, compras e inversión, liquidado el mes siguiente a cada trimestre, o cada mes si las ventas superan 6.010.121,04 € (gran empresa; se aproxima con las ventas del año). Personal en 14 pagas; personal y otros gastos, sin IVA. El balance de apertura se calcula con los plazos del año anterior o se introduce a mano; el impuesto que se paga en julio es el del año anterior. La póliza se dispone automáticamente cuando el saldo baja del mínimo y se devuelve cuando hay excedente.</footer>
+  </div>
+  <div id="viewLab" hidden>
+  <div class="lab-grid">
+    <form class="controls lab-form" id="labForm" onsubmit="return false">
+      <details class="grp" open><summary>Registrar una operación</summary>
+        <label for="op">Operación</label>
+        <select id="op">
+          <optgroup label="Circulante">
+            <option value="cobro">Cobrar a clientes</option>
+            <option value="ventaCredito">Vender a crédito</option>
+            <option value="ventaContado">Vender al contado</option>
+            <option value="compraContado">Comprar existencias al contado</option>
+            <option value="compraCredito">Comprar existencias a crédito</option>
+            <option value="pagoProv">Pagar a proveedores</option>
+            <option value="gasto">Pagar nóminas u otros gastos</option>
+          </optgroup>
+          <optgroup label="Financiación a corto">
+            <option value="polDisp">Disponer de la póliza de crédito (línea de crédito)</option>
+            <option value="polDev">Devolver la póliza de crédito (línea de crédito)</option>
+            <option value="factoring">Factoring sin recurso de facturas</option>
+          </optgroup>
+          <optgroup label="Inversión y financiación a largo">
+            <option value="inversion">Comprar maquinaria al contado</option>
+            <option value="prestamoLP">Recibir un préstamo a largo plazo</option>
+            <option value="amortLP">Devolver parte del préstamo a largo plazo</option>
+          </optgroup>
+        </select>
+        <div class="pair">
+          <div><label for="opImp">Importe (€)</label><input class="r" id="opImp" inputmode="decimal" value="50.000"></div>
+          <div id="opExtraBox"><label for="opExtra" id="opExtraLab">Margen (%)</label><input class="r" id="opExtra" inputmode="decimal" value="25"></div>
+        </div>
+        <p class="hint" id="opHint"></p>
+        <button class="go" id="opGo" type="button">Aplicar operación</button>
+      </details>
+      <details class="grp" open><summary>Ampliación de capital</summary>
+        <label for="akTipo">Tipo de ampliación</label>
+        <select id="akTipo">
+          <option value="dineraria">Dineraria: los socios aportan dinero</option>
+          <option value="compLP">Por compensación de créditos: deuda a largo plazo que se convierte en capital</option>
+          <option value="compCP">Por compensación de créditos: póliza de crédito que se convierte en capital</option>
+          <option value="nodineraria">No dineraria: los socios aportan maquinaria u otros bienes</option>
+        </select>
+        <div class="pair">
+          <div><label for="akNom">Capital (valor nominal, €)</label><input class="r" id="akNom" inputmode="decimal" value="100.000"></div>
+          <div><label for="akPrima">Prima de emisión (€)</label><input class="r" id="akPrima" inputmode="decimal" value="0"></div>
+        </div>
+        <p class="hint">La prima de emisión es lo que los nuevos socios pagan por encima del valor nominal; también forma parte del patrimonio neto.</p>
+        <button class="go" id="akGo" type="button">Aplicar ampliación de capital</button>
+      </details>
+      <div class="sec"><button type="button" id="opUndo">Deshacer la última</button><button type="button" id="opReset">Volver al balance de partida</button></div>
+      <details class="grp"><summary>Plazos y tesorería</summary>
+        <p class="hint">Situación estable: sin crecimiento ni estacionalidad. Cambia los plazos y observa cómo se mueve la tesorería neta.</p>
+        <div class="pair">
+          <div><label for="p_v">Ventas anuales (€)</label><input class="r" id="p_v" inputmode="decimal" value="6.000.000"></div>
+          <div><label for="p_c">Coste de ventas (% de ventas)</label><input class="r" id="p_c" inputmode="decimal" value="55"></div>
+          <div><label for="p_pmc">Días de cobro</label><input class="r" id="p_pmc" inputmode="decimal" value="75"></div>
+          <div><label for="p_pme">Días de existencias</label><input class="r" id="p_pme" inputmode="decimal" value="45"></div>
+          <div><label for="p_pmp">Días de pago</label><input class="r" id="p_pmp" inputmode="decimal" value="60"></div>
+          <div><label for="p_fm">Fondo de maniobra (€)</label><input class="r" id="p_fm" inputmode="decimal" value="1.200.000"></div>
+        </div>
+      </details>
+    </form>
+    <div class="panel">
+      <section class="card">
+        <h2>Balance de partida</h2>
+        <p class="note">Rellena las partidas como en un balance. Para poder empezar, el total del activo debe ser igual al total del patrimonio neto y el pasivo.</p>
+        <div class="balcols">
+          <table class="lb bform" id="bfA"></table>
+          <table class="lb bform" id="bfP"></table>
+        </div>
+        <div class="identity" id="bfCheck"></div>
+        <div class="sec" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <button class="reset primary" type="button" id="balApply">Empezar con este balance</button>
+          <button class="reset" type="button" id="balEx">Balance de ejemplo</button>
+          <button class="reset" type="button" id="balZero">Todo a cero</button>
+        </div>
+      </section>
+      <section class="card">
+        <h2>El balance, operación a operación</h2>
+        <p class="note">Toda operación tiene dos caras y el balance siempre cuadra: activo = patrimonio neto + pasivo. En verde, lo que sube; en rojo, lo que baja.</p>
+        <div class="opmsg" id="opMsg" aria-live="polite">Rellena el balance de partida o carga el ejemplo, y registra una operación.</div>
+        <div class="balcols" style="margin-top:16px">
+          <table class="lb" id="lbA"></table>
+          <table class="lb" id="lbP"></table>
+        </div>
+        <div class="inds" id="lbInd"></div>
+        <div class="identity" id="lbId"></div>
+      </section>
+      <section class="card">
+        <h2>Masas patrimoniales</h2>
+        <p class="note">Activo ordenado de menor a mayor liquidez; patrimonio neto y pasivo, de menor a mayor exigibilidad.</p>
+        <div class="scroll"><svg id="lbSvg" viewBox="0 0 700 360" width="100%" role="img" aria-label="Balance en masas patrimoniales"></svg></div>
+      </section>
+      <section class="card">
+        <h2>Plazos del circulante y tesorería neta</h2>
+        <p class="note">Identidad fundamental: tesorería neta = fondo de maniobra − NOF. Con el fondo de maniobra dado, todo lo que aumenta las NOF (cobrar más tarde, más existencias, pagar antes) reduce la tesorería.</p>
+        <div class="two">
+          <table class="lb" id="plTab"></table>
+          <div class="scroll"><svg id="plSvg" viewBox="0 0 520 300" width="100%" role="img" aria-label="Tesorería neta según días de cobro"></svg></div>
+        </div>
+      </section>
+      <section class="card">
+        <h2>Operaciones registradas</h2>
+        <ol class="hist" id="lbHist"></ol>
+      </section>
+    </div>
+  </div>
+  <footer>Laboratorio docente, con la estructura del balance del Plan General de Contabilidad y sin IVA. NOF = existencias + clientes − proveedores. Fondo de maniobra = activo corriente − pasivo corriente = (patrimonio neto + pasivo no corriente) − activo no corriente. Tesorería neta = tesorería − deudas con entidades de crédito a corto plazo = fondo de maniobra − NOF. En «Plazos y tesorería» se usa el año de 365 días y se supone que compras = coste de ventas.</footer>
+  </div>
+
+</div>
+<script>
+const MESES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const MESES_L=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const PERFILES={plana:Array(12).fill(1),verano:[0.7,0.7,0.8,0.9,1.1,1.3,1.5,1.4,1.1,0.9,0.8,0.8],final:[0.8,0.7,0.8,0.8,0.9,0.9,0.8,0.7,1.0,1.2,1.6,1.8]};
+// [min,max,step,formato]
+const R={ventas:[0,2e7,1e5,'e'],crec:[-50,100,1,'pctS'],intens:[0,150,10,'pct0'],compras:[0,100,1,'compras'],personal:[0,6e6,5e4,'e'],otros:[0,3e6,25e3,'e'],
+ pmc:[0,150,5,'dias'],pme:[0,120,5,'diasV'],pmp:[0,150,5,'dias'],pmc0:[0,150,5,'dias'],pme0:[0,120,5,'diasV'],pmp0:[0,150,5,'dias'],inv:[0,2e6,5e4,'e'],deudaLP:[0,6e6,5e4,'e'],tipoLP:[0,10,.25,'pct2'],plazoLP:[1,20,1,'anos'],
+ amort:[0,1e6,1e4,'e'],tasaIS:[0,50,1,'pct0'],tes0:[0,2e6,1e4,'e'],minimo:[0,1e6,1e4,'e'],div:[0,1e6,1e4,'e'],
+ limite:[0,3e6,5e4,'e'],tipo:[0,12,.25,'pct2'],polAper:[0,1.5,.05,'pct2'],polND:[0,1,.05,'pct2'],
+ cpImp:[0,2e6,5e4,'e'],cpTipo:[0,12,.25,'pct2'],cpPlazo:[1,12,1,'meses'],
+ facPct:[0,100,5,'pct0'],facCom:[0,3,.1,'pct1'],facTipo:[0,12,.25,'pct2'],
+ lpImp:[0,3e6,5e4,'e'],lpTipo:[0,10,.25,'pct2'],lpPlazo:[1,15,1,'anos'],lpCom:[0,2,.05,'pct2'],
+ clImp:[0,1.5e6,25e3,'e'],clTipo:[0,15,.25,'pct2'],clPlazo:[6,60,6,'meses'],clCom:[0,8,.25,'pct2'],
+ iniExi:[0,5e6,1e4,'e'],iniCli:[0,1e7,1e4,'e'],iniProv:[0,5e6,1e4,'e'],iniIVA:[0,2e6,5e3,'e'],iniIS:[0,2e6,5e3,'e'],polIni:[0,3e6,1e4,'e'],cfImp:[0,1.5e6,25e3,'e'],cfPre:[0,3e7,25e4,'e'],cfCom:[0,10,.5,'pct1'],
+ akImp:[0,3e6,5e4,'e'],akPre:[0,4e7,5e5,'e']};
+const SOURCES=['pol','cp','fac','conf','lp','cl','cf','ak'];
+const INI={ventas:6e6,crec:0,perfil:'verano',intens:100,compras:55,personal:14e5,otros:6e5,pmc:75,pme:45,pmp:60,cambio:false,pmc0:75,pme0:45,pmp0:60,inv:3e5,invMes:2,manual:false,iniExi:0,iniCli:0,iniProv:0,iniIVA:0,iniIS:0,polIni:0,
+ deudaLP:15e5,tipoLP:4,plazoLP:6,amort:15e4,tasaIS:25,iva:true,tes0:15e4,minimo:1e5,div:0,divMes:5,
+ pol:true,limite:85e4,tipo:5,polAper:0,polND:0,
+ cp:false,cpImp:3e5,cpMes:5,cpTipo:5.5,cpPlazo:6,cpModo:'bullet',
+ fac:false,facPct:30,facCom:1,facTipo:5,facMes:0,conf:false,
+ lp:false,lpImp:5e5,lpMes:2,lpTipo:4.5,lpPlazo:5,lpCom:.5,
+ cl:false,clImp:2e5,clMes:4,clTipo:8,clPlazo:36,clCom:3,
+ cf:false,cfImp:25e4,cfMes:5,cfPre:6e6,cfCom:6,
+ ak:false,akImp:5e5,akMes:4,akPre:8e6,akMot:'oportunidad'};
+const BLANK={...INI,ventas:0,crec:0,perfil:'plana',compras:0,personal:0,otros:0,pmc:0,pme:0,pmp:0,pmc0:0,pme0:0,pmp0:0,inv:0,invMes:0,deudaLP:0,amort:0,tes0:0,minimo:0,div:0,
+ limite:0,cpImp:0,lpImp:0,clImp:0,cfImp:0,cfPre:0,akImp:0,akPre:0,facPct:0};
+let REF=BLANK;
+const ids=Object.keys(INI), f=document.getElementById('f');
+const UNIT={e:'€',pctS:'%',pct0:'%',pct1:'%',pct2:'%',compras:'% ventas',dias:'días',diasV:'días',anos:'años',meses:'meses'};
+const DEC={pct1:1,pct2:2};
+Object.entries(R).forEach(([k,[mn,mx,st,ft]])=>{const el=document.getElementById(k); el.min=mn; el.max=mx; el.step=st; el.dataset.max0=mx;
+  const o=f.querySelector(`output[for="${k}"]`); const lab=f.querySelector(`label[for="${k}"]`);
+  const w=document.createElement('span'); w.className='numwrap'; w.innerHTML=`<input type="text" inputmode="decimal" id="${k}_n" aria-label="${lab?lab.textContent:''}"><span class="unit">${UNIT[ft]}</span>`; o.replaceWith(w);
+  const tx=w.querySelector('input');
+  const commit=()=>{let raw=tx.value.replace(/[^0-9,.\-−]/g,'').replace('−','-').replace(/\./g,'').replace(',','.'); let v=parseFloat(raw); if(isNaN(v)) v=0; v=Math.max(mn,v); if(v>+el.max) el.max=v; el.value=v; el.dataset.exact=v; update();};
+  tx.addEventListener('change',commit); tx.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault(); commit(); tx.blur();}});
+  el.addEventListener('input',()=>{delete el.dataset.exact;});
+});
+['invMes','divMes','cpMes','facMes','lpMes','clMes','cfMes','akMes'].forEach(id=>document.getElementById(id).innerHTML=MESES_L.map((m,i)=>`<option value="${i}">${m[0].toUpperCase()+m.slice(1)}</option>`).join(''));
+
+function fmt(n,d=0){const neg=n<0; let [i,fr]=Math.abs(n).toFixed(d).split('.'); i=i.replace(/\B(?=(\d{3})+(?!\d))/g,'.'); const zero=+i.replace(/\./g,'')===0&&!(fr&&+fr>0); return (neg&&!zero?'−':'')+i+(fr?','+fr:'');}
+const eur=n=>fmt(n)+' €', sgnEur=n=>(Math.round(n)>0?'+':'')+eur(n), pct=(n,d=1)=>fmt(n,d)+' %';
+function ticks(mn,mx,n=4){const raw=(mx-mn)/n||1,p=Math.pow(10,Math.floor(Math.log10(raw)));const st=[1,2,2.5,5,10].map(k=>k*p).find(k=>k>=raw);const o=[];for(let v=Math.ceil(mn/st)*st;v<=mx+1e-6;v+=st)o.push(Math.abs(v)<1e-6?0:v);return o;}
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+const FMT={e:eur,pctS:v=>(v>0?'+':'')+pct(v,0),pct0:v=>pct(v,0),pct1:v=>pct(v,1),pct2:v=>pct(v,2),compras:v=>pct(v,0)+' de las ventas',dias:v=>fmt(v)+' días',diasV:v=>fmt(v)+' días de ventas',anos:v=>fmt(v)+(v===1?' año':' años'),meses:v=>fmt(v)+(v===1?' mes':' meses')};
+
+function read(){const s={};ids.forEach(k=>{const el=document.getElementById(k); s[k]= typeof INI[k]==='boolean'?el.checked : typeof INI[k]==='string'?el.value : parseFloat(el.dataset.exact!==undefined?el.dataset.exact:el.value);}); if(s.perfil===undefined) s.perfil='verano'; return s;}
+
+function loan(imp,start,rate,n,mode){const r=rate/100/12, out=Array.from({length:12},()=>({in:0,i:0,p:0,bal:0})); if(!(imp>0)) return out;
+  const cuota=mode==='bullet'?0:(r===0?imp/n:imp*r/(1-Math.pow(1+r,-n))); let bal=0;
+  for(let m=0;m<12;m++){const o=out[m]; if(m===start){o.in=imp; bal=imp;} else if(m>start&&bal>1e-6){const k=m-start; o.i=bal*r; if(mode==='bullet'){ if(k===n) o.p=bal; } else o.p=Math.min(bal,cuota-o.i); bal-=o.p;} o.bal=bal;} return out;}
+
+function calc(s){
+  const prof=PERFILES[s.perfil], k=s.intens/100, g=s.crec/100, c=s.compras/100, t=s.tasaIS/100, ivaR=s.iva?0.21:0;
+  const w=j=>1+k*(prof[((j%12)+12)%12]-1);
+  let norm=0; for(let i=0;i<12;i++) norm+=w(i)*Math.pow(1+g,i/12);
+  const base=s.ventas/norm, sales=i=>base*w(i)*Math.pow(1+g,i/12), cogs=i=>sales(i)*c;
+  const tail=(fn,e,d)=>{let rem=d/30,i=e,sum=0;while(rem>1e-9){const p=Math.min(1,rem);sum+=fn(i)*p;rem-=p;i--;}return sum;};
+  const head=(fn,st,d)=>{let rem=d/30,i=st,sum=0;while(rem>1e-9){const p=Math.min(1,rem);sum+=fn(i)*p;rem-=p;i++;}return sum;};
+  const P0=s.cambio?{c:s.pmc0,e:s.pme0,p:s.pmp0}:{c:s.pmc,e:s.pme,p:s.pmp};
+  const dC=i=>i<0?P0.c:s.pmc, dE=i=>i<0?P0.e:s.pme, dP=i=>i<0?P0.p:s.pmp;
+  const man=!!s.manual, ivaR0=s.iva?0.21:0;
+  const existM=i=>head(cogs,i+1,dE(i));
+  const exist=i=>(man&&i===-1)?s.iniExi:existM(i), compras=i=>cogs(i)+exist(i)-exist(i-1);
+  const facOn=s.fac&&s.facPct>0, salesF=i=>(facOn&&i>=s.facMes&&i<=11)?sales(i)*s.facPct/100:0, salesN=i=>sales(i)-salesF(i);
+  const cliN=i=>(man&&i===-1)?s.iniCli/(1+ivaR0):tail(salesN,i,dC(i)), cliSin=i=>(man&&i===-1)?s.iniCli/(1+ivaR0):tail(sales,i,dC(i)), prov=i=>(man&&i===-1)?s.iniProv/(1+ivaR0):tail(compras,i,dP(i));
+  const nof=i=>cliN(i)+exist(i)-prov(i);
+  let ventasAno=0,consumo=0; for(let m=0;m<12;m++){ventasAno+=sales(m);consumo+=cogs(m);}
+  const ebitda=ventasAno-consumo-s.personal-s.otros;
+  // deuda existente
+  const rLP=s.tipoLP/100/12,nLP=s.plazoLP*12, cuotaLP=s.deudaLP<=0?0:(rLP===0?s.deudaLP/nLP:s.deudaLP*rLP/(1-Math.pow(1+rLP,-nLP)));
+  const lp0=[]; let bal=s.deudaLP; for(let m=0;m<12;m++){const i=bal*rLP,pr=Math.min(bal,cuotaLP-i); lp0.push({i,p:pr,bal:bal-pr}); bal-=pr;}
+  // fuentes con calendario
+  const L=s.lp?loan(s.lpImp,s.lpMes,s.lpTipo,s.lpPlazo*12,'cuotas'):loan(0), C=s.cp?loan(s.cpImp,s.cpMes,s.cpTipo,s.cpPlazo,s.cpModo):loan(0), CL=s.cl?loan(s.clImp,s.clMes,s.clTipo,s.clPlazo,'cuotas'):loan(0);
+  const lpComM=m=>(s.lp&&m===s.lpMes)?s.lpImp*s.lpCom/100:0, clComM=m=>(s.cl&&m===s.clMes)?s.clImp*s.clCom/100:0;
+  const facCostM=m=>salesF(m)*(1+ivaR)*(s.facCom/100+s.facTipo/100*s.pmc/360);
+  let intProg=0; for(let m=0;m<12;m++) intProg+=lp0[m].i+L[m].i+C[m].i+CL[m].i+lpComM(m)+clComM(m)+facCostM(m);
+  const baii=ebitda-s.amort, bai=baii-intProg, isBAII=t*Math.max(baii,0), isCash=t*Math.max(bai,0), escudo=isBAII-isCash;
+  // IVA
+  const rep=i=>sales(i)*ivaR, sop=i=>compras(i)*ivaR+(i===s.invMes?s.inv*ivaR:0);
+  const ivaMensual=s.ventas>6010121.04, per=ivaMensual?1:3;
+  let ivaIni=0; for(let i=-per;i<0;i++) ivaIni+=rep(i)-sop(i); ivaIni=Math.max(0,ivaIni); if(man) ivaIni=s.iva?s.iniIVA:0;
+  let carry=0; const liq=m=>{if(m%per!==0) return 0; if(m===0&&man){carry=0; return ivaIni;} let x=carry; for(let i=m-per;i<m;i++) x+=rep(i)-sop(i); if(x>0){carry=0;return x;} carry=x; return 0;};
+  const pol=s.pol, lim=pol?s.limite:0;
+  const isPrev=man?s.iniIS:isCash; const rows=[]; let sinPol=s.tes0, saldo=s.tes0, disp=man?s.polIni:0, intPol=0, comPol=0, deficit=0, deficitMes=-1, usoMax=0, ivaEf=0, facAnt=0, facCost=0;
+  for(let m=0;m<12;m++){
+    const v=sales(m);
+    const cobEx=cliN(m-1)+salesN(m)-cliN(m)+salesF(m), pagEx=prov(m-1)+compras(m)-prov(m);
+    const cobros=cobEx*(1+ivaR), pagosProv=pagEx*(1+ivaR), anticipo=salesF(m)*(1+ivaR);
+    const personal=s.personal/14*((m===5||m===11)?2:1), otros=s.otros/12;
+    const invEx=m===s.invMes?s.inv:0, invP=invEx*(1+ivaR), liqIVA=liq(m);
+    const isPago=m===6?isPrev+escudo:0, escM=m===6?escudo:0;
+    const fco=cobros-pagosProv-personal-otros-liqIVA-isPago-invP;
+    ivaEf+=cobEx*ivaR-pagEx*ivaR-invEx*ivaR-liqIVA;
+    const fc=facCostM(m); facAnt+=anticipo; facCost+=fc;
+    const lpF=L[m].in-lpComM(m)-L[m].i-L[m].p, cpF=C[m].in-C[m].i-C[m].p, clF=CL[m].in-clComM(m)-CL[m].i-CL[m].p;
+    const deudaSin=-lp0[m].i-lp0[m].p+lpF+cpF+clF-fc+escM;
+    const divM=m===s.divMes?s.div:0, cfM=(s.cf&&m===s.cfMes)?s.cfImp*(1-s.cfCom/100):0, akM=(s.ak&&m===s.akMes)?s.akImp:0;
+    const flujoSin=fco+deudaSin-divM+cfM+akM; sinPol+=flujoSin;
+    const interes=disp*s.tipo/100/12, com=(pol&&m===0?s.limite*s.polAper/100:0)+(pol?(lim-disp)*s.polND/100/12:0);
+    const pre=saldo+flujoSin-interes-com; let dDisp=0;
+    if(pre<s.minimo) dDisp=Math.max(0,Math.min(lim-disp,s.minimo-pre)); else if(disp>0) dDisp=-Math.min(disp,pre-s.minimo);
+    dDisp=Math.max(dDisp,-disp); disp+=dDisp; saldo=pre+dDisp; intPol+=interes; comPol+=com; usoMax=Math.max(usoMax,disp);
+    const falta=Math.max(0,s.minimo-saldo); if(falta>deficit){deficit=falta;deficitMes=m;}
+    const fca=fco+deudaSin-interes-com+dDisp;
+    rows.push({m,v,cobros,anticipo,pagosProv,personal,otros,liqIVA,isPago,invP,fco,lpI:lp0[m].i,lpP:lp0[m].p,
+      lpIn:L[m].in,lpOut:lpComM(m)+L[m].i+L[m].p,cpIn:C[m].in,cpOut:C[m].i+C[m].p,clIn:CL[m].in,clOut:clComM(m)+CL[m].i+CL[m].p,
+      fc,escM,pol:interes+com,dDisp,fca,divM,cfM,akM,vt:fca-divM+cfM+akM,saldo,sinPol,disp,nof:nof(m)});
+  }
+  let ivaFin=carry; for(let i=12-per;i<12;i++) ivaFin+=rep(i)-sop(i); ivaFin=Math.max(0,ivaFin);
+  const nofs=rows.map(r=>r.nof), nof0=nof(-1), nofMin=Math.min(nof0,...nofs), nofMax=Math.max(nof0,...nofs);
+  let necMax=0,necMes=-1, minSin=Infinity, minSinMes=0; rows.forEach(r=>{const n=s.minimo-r.sinPol; if(n>necMax){necMax=n;necMes=r.m;} if(r.sinPol<minSin){minSin=r.sinPol;minSinMes=r.m;}});
+  const sum=f=>rows.reduce((a,x)=>a+f(x),0);
+  const fcoAno=sum(x=>x.fco), fcaAno=sum(x=>x.fca);
+  const lpNewI=sum(x=>0)+L.reduce((a,x)=>a+x.i,0), cpI=C.reduce((a,x)=>a+x.i,0), clI=CL.reduce((a,x)=>a+x.i,0), lp0I=lp0.reduce((a,x)=>a+x.i,0);
+  const servicio=sum(x=>x.lpI+x.lpP)+L.reduce((a,x)=>a+x.i+x.p,0)+C.reduce((a,x)=>a+x.i+x.p,0)+CL.reduce((a,x)=>a+x.i+x.p,0)+intPol;
+  const deudaFin=lp0[11].bal+L[11].bal+C[11].bal+CL[11].bal+rows[11].disp;
+  const costeTot=lp0I+lpNewI+(s.lp?s.lpImp*s.lpCom/100:0)+cpI+clI+(s.cl?s.clImp*s.clCom/100:0)+facCost+intPol+comPol+(s.cf?s.cfImp*s.cfCom/100:0);
+  return {rows,ventasAno,consumo,ebitda,margen:ventasAno?ebitda/ventasAno*100:0,nof0,dNof:rows[11].nof-nof0,nofMin,nofMax,necMax,necMes,minSin,minSinMes,
+    intPol,comPol,deficit,deficitMes,usoMax,ciclo:s.pmc+s.pme-s.pmp,tesFinal:rows[11].saldo,dispFinal:rows[11].disp,fcoAno,fcaAno,cuotaLP,lp0,L,C,CL,
+    lp0I,lpNewI,cpI,clI,facAnt,facCost,ivaMensual,baii,bai,isBAII,isCash,escudo,intProg,ivaEf,ivaIni,ivaFin,servicio,deudaFin,costeTot,
+    rcsd:servicio>0?fcoAno/servicio:null, rcsdt:servicio>0?(s.tes0+fcoAno)/servicio:null, dEb:ebitda>0?(deudaFin-rows[11].saldo)/ebitda:null,
+    bal:{exi0:exist(-1),exi1:exist(11),cli0:cliSin(-1)*(1+ivaR),cli1:cliN(11)*(1+ivaR),cli1sin:cliSin(11)*(1+ivaR),prov0:prov(-1)*(1+ivaR),prov1:prov(11)*(1+ivaR),
+      hac0:ivaIni+isPrev,hac1:ivaFin+isCash,pol0:man?s.polIni:0}, isPrev, taxDiff:isCash-isPrev};
+}
+const off=s=>({...s,cp:false,fac:false,conf:false,lp:false,cl:false,cf:false,ak:false,pol:false});
+const anyNew=s=>['cp','fac','lp','cl','cf','ak'].some(k=>s[k]);
+
+function outputs(s){ document.getElementById('p_prev').disabled=!s.cambio; document.getElementById('p_ini').disabled=!s.manual; Object.entries(R).forEach(([k,v])=>{const t=document.getElementById(k+'_n'); if(t&&document.activeElement!==t) t.value=fmt(s[k],DEC[v[3]]||(Number.isInteger(s[k])?0:2));});
+  SOURCES.forEach(k=>{const on=s[k]; document.getElementById('d_'+k).classList.toggle('on',on); document.getElementById('b_'+k).textContent=on?'Activada':'Desactivada'; const p=document.getElementById('p_'+k); if(p) p.disabled=!on;});}
+
+function update(){
+  const s=read(); outputs(s);
+  const r=calc(s), rb=calc(off(s));
+  document.getElementById('ebitdaCalc').innerHTML=`<tr><td>Ventas del año</td><td>${eur(r.ventasAno)}</td></tr><tr><td>− Consumo de materiales (${pct(s.compras,0)})</td><td>${eur(-r.consumo)}</td></tr><tr><td>− Gastos de personal</td><td>${eur(-s.personal)}</td></tr><tr><td>− Otros gastos fijos</td><td>${eur(-s.otros)}</td></tr><tr class="t"><td>= EBITDA</td><td>${eur(r.ebitda)}</td></tr><tr><td>Margen EBITDA = EBITDA / ventas</td><td>${pct(r.margen)}</td></tr><tr><td>− Amortización</td><td>${eur(-s.amort)}</td></tr><tr class="t"><td>= BAII</td><td>${eur(r.baii)}</td></tr><tr><td>− Intereses y costes financieros previstos</td><td>${eur(-r.intProg)}</td></tr><tr class="t"><td>= BAI</td><td>${eur(r.bai)}</td></tr><tr><td>Impuesto (${pct(s.tasaIS,0)}), se paga en julio</td><td>${eur(-r.isCash)}</td></tr>`;
+  document.getElementById('cuotaTxt').textContent=s.deudaLP>0?`Cuota mensual (sistema francés): ${eur(r.cuotaLP)}. En el año: ${eur(r.lp0I)} de intereses.`:'Sin préstamo a largo previo.';
+  drawMsg(r,rb,s); drawKpis(r,rb,calc(REF),calc(off(REF))); drawCash(r,rb,s); drawSrc(r,s); drawBal(r,s); drawRatios(r); drawFlujos(r); drawBridge(r,s); drawNof(r); drawWhy(r,rb,s); drawGuide(s); drawMonth(r,s);
+}
+
+function drawMsg(r,rb,s){let t;
+  if(s.ventas<=0&&s.personal<=0&&s.otros<=0){t='Escribe las ventas, los costes y los plazos de tu empresa en el panel de la izquierda, o pulsa <b>Cargar empresa de ejemplo</b>.';}
+  else if(r.ebitda<=0){t=`La empresa pierde dinero: su EBITDA es de <span class="bad">${eur(r.ebitda)}</span>. La financiación solo aplaza el problema; primero hay que recuperar la rentabilidad.`;}
+  else{
+    t = rb.necMax>0 ? `La empresa gana <b>${eur(r.ebitda)}</b> de EBITDA (${pct(r.margen)} de margen), pero sin financiación adicional su tesorería llegaría a <span class="bad">${eur(rb.minSin)}</span> en ${MESES_L[rb.minSinMes]}: necesitaría hasta <b>${eur(rb.necMax)}</b> para mantener el saldo mínimo.` : `La empresa gana <b>${eur(r.ebitda)}</b> de EBITDA y su tesorería no baja del saldo mínimo: no necesita financiación adicional este año.`;
+    if(anyNew(s)) t += r.necMax>0.5 ? ` Con las fuentes activadas, el hueco que queda para la póliza es de <b>${eur(r.necMax)}</b>.` : ` Con las fuentes activadas, el hueco queda cubierto sin usar la póliza.`;
+    if(r.deficit>0.5) t += s.pol ? ` La póliza de ${eur(s.limite)} no basta: en ${MESES_L[r.deficitMes]} faltan <span class="bad">${eur(r.deficit)}</span>.` : ` Sin línea de crédito, en ${MESES_L[r.deficitMes]} faltan <span class="bad">${eur(r.deficit)}</span>.`;
+  }
+  document.getElementById('msg').innerHTML=t;}
+
+function drawKpis(r,rb,r0,rb0){
+  const items=[['Margen EBITDA',r.margen,r0.margen,1,v=>pct(v),d=>(d>0?'+':'−')+fmt(Math.abs(d),1)+' puntos'],
+    ['FCO del año',r.fcoAno,r0.fcoAno,1,eur,sgnEur],['FCA del año',r.fcaAno,r0.fcaAno,1,eur,sgnEur],
+    ['Necesidad sin financiación adicional',rb.necMax,rb0.necMax,-1,eur,sgnEur],
+    ['Hueco que queda para la póliza (línea de crédito)',r.necMax,r0.necMax,-1,eur,sgnEur],
+    ['Coste financiero total del año',r.costeTot,r0.costeTot,-1,eur,sgnEur],
+    ['NOF máximas del año',r.nofMax,r0.nofMax,-1,eur,sgnEur],
+    ['Ciclo de caja (cobro + existencias − pago)',r.ciclo,r0.ciclo,-1,v=>fmt(v)+' días',d=>(d>0?'+':'−')+fmt(Math.abs(d))+' días']];
+  document.getElementById('kpis').innerHTML=items.map(([n,v,v0,dir,fv,fd])=>{const d=v-v0,same=Math.abs(d)<(fv===eur?0.5:0.05),col=same?css('--muted'):(d*dir>0?css('--ok'):css('--out'));
+    return `<div class="kpi"><div class="n">${n}</div><div class="v">${fv(v)}</div><div class="d" style="color:${col}">${same?'Igual que la referencia':(d>0?'▲ ':'▼ ')+fd(d)+' respecto a la referencia'}</div></div>`;}).join('');}
+
+function drawCash(r,rb,s){
+  const W=1000,H=440,Lx=118,Rx=16,T=20,B=300,PB=420,PT=330;
+  const pts=[{lab:'Inicio',b:s.tes0,sin:s.tes0,con:s.tes0,disp:0}].concat(r.rows.map((x,i)=>({lab:MESES[x.m],b:rb.rows[i].sinPol,sin:x.sinPol,con:x.saldo,disp:x.disp})));
+  let mn=Math.min(0,s.minimo,...pts.map(p=>Math.min(p.b,p.sin,p.con))), mx=Math.max(s.minimo,...pts.map(p=>Math.max(p.b,p.sin,p.con)));
+  const pad=(mx-mn)*0.08||1e4; mx+=pad; mn-=pad;
+  const n=pts.length,X=i=>Lx+i*(W-Lx-Rx)/(n-1),Y=v=>T+(mx-v)/(mx-mn)*(B-T);
+  const ink=css('--ink'),muted=css('--muted'),line=css('--line'),warn=css('--warn'),teal=css('--teal'),out=css('--out');
+  let g=''; ticks(mn,mx,5).forEach(v=>{g+=`<line x1="${Lx}" x2="${W-Rx}" y1="${Y(v)}" y2="${Y(v)}" stroke="${line}"/><text x="${Lx-10}" y="${Y(v)+5}" font-size="14" text-anchor="end" fill="${muted}">${eur(v)}</text>`;});
+  g+=`<line x1="${Lx}" x2="${W-Rx}" y1="${Y(0)}" y2="${Y(0)}" stroke="${ink}" stroke-width="1.3"/>`;
+  for(let i=0;i<n-1;i++){const a=pts[i].sin,b=pts[i+1].sin,m=s.minimo; if(a>=m&&b>=m) continue; let x1=X(i),x2=X(i+1),ya=Math.min(a,m),yb=Math.min(b,m);
+    if(a>m){const q=(a-m)/(a-b);x1=X(i)+q*(X(i+1)-X(i));ya=m;} if(b>m){const q=(m-a)/(b-a);x2=X(i)+q*(X(i+1)-X(i));yb=m;}
+    g+=`<polygon points="${x1},${Y(m)} ${x2},${Y(m)} ${x2},${Y(yb)} ${x1},${Y(ya)}" fill="${out}" opacity=".2"/>`;}
+  g+=`<line x1="${Lx}" x2="${W-Rx}" y1="${Y(s.minimo)}" y2="${Y(s.minimo)}" stroke="${warn}" stroke-width="2.5" stroke-dasharray="8 5"/>`;
+  if(anyNew(s)) g+=`<polyline fill="none" stroke="${out}" stroke-width="2" stroke-dasharray="3 4" points="${pts.map((p,i)=>X(i)+','+Y(p.b)).join(' ')}"/>`;
+  g+=`<polyline fill="none" stroke="${muted}" stroke-width="2.5" stroke-dasharray="6 5" points="${pts.map((p,i)=>X(i)+','+Y(p.sin)).join(' ')}"/>`;
+  g+=`<polyline fill="none" stroke="${ink}" stroke-width="3.5" points="${pts.map((p,i)=>X(i)+','+Y(p.con)).join(' ')}"/>`;
+  pts.forEach((p,i)=>{g+=`<circle cx="${X(i)}" cy="${Y(p.con)}" r="4.5" fill="${p.con<s.minimo-0.5?out:ink}"/>`;});
+  const dmax=Math.max(s.pol?s.limite:0,...pts.map(p=>p.disp),1), YP=v=>PB-v/dmax*(PB-PT);
+  g+=`<text x="${Lx-10}" y="${PT+6}" font-size="14" text-anchor="end" fill="${muted}">${eur(dmax)}</text><text x="${Lx-10}" y="${PB+5}" font-size="14" text-anchor="end" fill="${muted}">0 €</text><line x1="${Lx}" x2="${W-Rx}" y1="${PB}" y2="${PB}" stroke="${ink}"/>`;
+  if(s.pol&&s.limite>0) g+=`<line x1="${Lx}" x2="${W-Rx}" y1="${YP(s.limite)}" y2="${YP(s.limite)}" stroke="${line}" stroke-dasharray="4 4"/>`;
+  pts.forEach((p,i)=>{if(p.disp>0.5) g+=`<rect x="${X(i)-16}" y="${YP(p.disp)}" width="32" height="${PB-YP(p.disp)}" fill="${teal}" rx="2"/>`; g+=`<text x="${X(i)}" y="${B+22}" font-size="14" text-anchor="middle" fill="${muted}">${p.lab}</text>`;});
+  document.getElementById('cash').innerHTML=g;}
+
+function drawSrc(r,s){
+  const rows=[]; const dil=(imp,pre)=>imp/(pre+imp)*100;
+  if(s.deudaLP>0) rows.push(['Préstamo a largo que ya existía','—',eur(r.lp0I),`${pct(s.tipoLP,2)}, ${FMT.anos(s.plazoLP)} pendientes`,'Pasivo no corriente: baja con cada cuota','Deuda bancaria a largo']);
+  if(s.pol) rows.push(['Póliza de crédito (línea de crédito)',(r.usoMax>0.5?`Hasta ${eur(r.usoMax)}`:'No se usa')+` (límite ${eur(s.limite)})`,eur(r.intPol+r.comPol),`${pct(s.tipo,2)} sobre lo dispuesto${s.polAper||s.polND?' + comisiones':''}`,'Pasivo corriente: póliza dispuesta','Deuda bancaria a corto; solo pagas intereses por lo que usas']);
+  if(s.cp) rows.push(['Préstamo bancario a corto plazo',eur(s.cpImp),eur(r.cpI),`${pct(s.cpTipo,2)}, ${FMT.meses(s.cpPlazo)}, ${s.cpModo==='bullet'?'devolución al vencimiento':'cuotas mensuales'}`,'Pasivo corriente: deuda a corto','Deuda bancaria a corto, importe cerrado']);
+  if(s.fac) rows.push(['Factoring sin recurso',`${eur(r.facAnt)} anticipados`,eur(r.facCost),`${pct(s.facCom,1)} + ${pct(s.facTipo,2)} por ${fmt(s.pmc)} días ≈ ${pct(s.facCom*360/Math.max(s.pmc,1)+s.facTipo,1)} anual equivalente`,`Reduce el saldo de clientes: ${eur(r.bal.cli1)} en lugar de ${eur(r.bal.cli1sin)}`,'Venta de facturas: liquidez a corto sin deuda bancaria']);
+  if(s.conf) rows.push(['Confirming','0 €','0 €','Lo suele pagar el proveedor que anticipa','Ninguno: pagas en la misma fecha','No es financiación para tu empresa; financia a tus proveedores']);
+  if(s.lp) rows.push(['Préstamo bancario a largo plazo',eur(s.lpImp),eur(r.lpNewI+s.lpImp*s.lpCom/100),`${pct(s.lpTipo,2)}, ${FMT.anos(s.lpPlazo)} + ${pct(s.lpCom,2)} de apertura`,'Pasivo no corriente (y corriente por la parte a un año)','Deuda bancaria a largo: adecuada para inversión y NOF permanentes']);
+  if(s.cl) rows.push(['Crowdlending',eur(s.clImp),eur(r.clI+s.clImp*s.clCom/100),`${pct(s.clTipo,2)}, ${FMT.meses(s.clPlazo)} + ${pct(s.clCom,2)} de la plataforma`,'Pasivo financiero (según plazo)','Deuda con inversores particulares vía plataforma; más cara, más ágil y no consume CIRBE']);
+  if(s.cf) rows.push(['Crowdfunding de capital',eur(s.cfImp*(1-s.cfCom/100))+' netos',`${eur(s.cfImp*s.cfCom/100)} + ${pct(dil(s.cfImp,s.cfPre),1)} de la empresa`,`Valoración previa ${eur(s.cfPre)}`,'Patrimonio neto','Capital de muchos pequeños inversores; el coste es la dilución']);
+  if(s.ak) rows.push(['Ampliación de capital',eur(s.akImp),`${pct(dil(s.akImp,s.akPre),1)} de la empresa`,`Valoración previa ${eur(s.akPre)}`,'Patrimonio neto','Capital: sin cuotas ni intereses, pero con pérdida de control', s.akMot==='puntual']);
+  let h='<tr><th>Fuente</th><th>Fondos que aporta</th><th>Coste en el año</th><th>Condiciones</th><th>Efecto en el balance</th><th>Naturaleza</th></tr>';
+  h+= rows.length? rows.map(x=>`<tr class="${x[6]?'warn':''}"><td><b>${x[0]}</b></td><td class="n">${x[1]}</td><td class="n">${x[2]}</td><td>${x[3]}</td><td>${x[4]}</td><td>${x[5]}</td></tr>`).join('') : '<tr><td colspan="6">No hay ninguna fuente activada.</td></tr>';
+  document.getElementById('srcTable').innerHTML=h;}
+
+function drawBal(r,s){const b=r.bal;
+  const lpNew1=r.L[11].bal, cp1=r.C[11].bal, cl1=r.CL[11].bal;
+  const ac0=b.exi0+b.cli0+s.tes0, ac1=b.exi1+b.cli1+r.tesFinal, pc0=b.prov0+b.hac0+b.pol0, pc1=b.prov1+b.hac1+r.dispFinal+cp1;
+  const cap=(s.cf?s.cfImp*(1-s.cfCom/100):0)+(s.ak?s.akImp:0);
+  const rw=(l,a,c,cls='')=>{const d=c-a; return `<tr class="${cls}${Math.abs(d)>0.5&&!cls?' ':''}"><td>${l}</td><td>${eur(a)}</td><td>${eur(c)}</td><td style="color:${Math.abs(d)<0.5?css('--muted'):''}">${Math.abs(d)<0.5?'=':sgnEur(d)}</td></tr>`;};
+  let h='<thead><tr><th></th><th>1 de enero</th><th>31 de diciembre</th><th>Variación</th></tr></thead><tbody>';
+  h+='<tr class="g"><td colspan="4">Activo corriente</td></tr>'+rw('Existencias',b.exi0,b.exi1)+rw(s.fac?'Clientes (reducidos por el factoring)':'Clientes',b.cli0,b.cli1,s.fac?'hl':'')+rw('Tesorería',s.tes0,r.tesFinal)+rw('Total activo corriente',ac0,ac1,'t');
+  h+='<tr class="g"><td colspan="4">Pasivo corriente</td></tr>'+rw('Proveedores',b.prov0,b.prov1)+rw('Hacienda (IVA e impuesto pendientes)',b.hac0,b.hac1)+rw('Póliza de crédito (línea de crédito) dispuesta',r.bal.pol0,r.dispFinal)+(s.cp?rw('Préstamo a corto plazo',0,cp1):'')+rw('Total pasivo corriente',pc0,pc1,'t');
+  h+=rw('Fondo de maniobra (AC − PC)',ac0-pc0,ac1-pc1,'t');
+  h+='<tr class="g"><td colspan="4">Financiación a largo y capital</td></tr>'+rw('Préstamo a largo que ya existía',s.deudaLP,r.lp0[11].bal)+(s.lp?rw('Préstamo a largo nuevo',0,lpNew1):'')+(s.cl?rw('Crowdlending',0,cl1):'')+((s.cf||s.ak)?rw('Capital aportado en el año',0,cap,'hl'):'');
+  document.getElementById('balance').innerHTML=h+'</tbody>';}
+
+function meter(val,zones,max){const p=v=>Math.max(0,Math.min(100,v/max*100)); let segs='',prev=0; zones.forEach(z=>{segs+=`<span style="width:${p(z.to)-p(prev)}%;background:${z.c}"></span>`;prev=z.to;}); return `<div class="meter-wrap"><div class="meter">${segs}</div>${val===null?'':`<div class="pin" style="left:${p(val)}%"></div>`}</div>`;}
+function drawRatios(r){const red=css('--out'),amb=css('--warn'),grn=css('--ok'); const cov=[{to:1,c:red},{to:1.5,c:amb},{to:3,c:grn}], deb=[{to:2.5,c:grn},{to:3,c:amb},{to:8,c:red}];
+  const f2=v=>v===null?'—':(v<0?'−':'')+fmt(Math.abs(v),2);
+  const it=(n,v,txt,z,max,tk)=>`<div class="ratio"><div class="name">${n}</div><div class="val">${txt}</div>${meter(v,z,max)}<div class="scale">${tk.map(x=>`<span style="left:${Math.min(x[0]/max*100,100)}%">${x[1]}</span>`).join('')}</div></div>`;
+  document.getElementById('ratios').innerHTML=it('RCSD = FCO / servicio de la deuda',r.rcsd,f2(r.rcsd),cov,3,[[0,'0'],[1,'1'],[1.5,'1,5'],[3,'3+']])+it('RCSD ajustado por tesorería',r.rcsdt,f2(r.rcsdt),cov,3,[[0,'0'],[1,'1'],[1.5,'1,5'],[3,'3+']])+it('Deuda financiera neta / EBITDA',r.dEb,r.dEb===null?'sin EBITDA':f2(r.dEb)+'x',deb,8,[[0,'0'],[2.5,'2,5'],[8,'8+']])+`<p class="hint" style="grid-column:1/-1">Servicio de la deuda del año: ${eur(r.servicio)} (intereses y principal de préstamos y crowdlending, más intereses de la póliza). Deuda financiera al cierre: ${eur(r.deudaFin)}.</p>`;}
+
+function drawFlujos(r){const W=1000,H=330,Lx=118,Rx=16,T=16,B=290; const vals=r.rows.flatMap(x=>[x.fco,x.fca]); let mn=Math.min(0,...vals),mx=Math.max(0,...vals); const pad=(mx-mn)*.08||1e4; mn-=pad; mx+=pad;
+  const Y=v=>T+(mx-v)/(mx-mn)*(B-T), bw=(W-Lx-Rx)/12, ink=css('--ink'),teal=css('--teal'),muted=css('--muted'),line=css('--line'),out=css('--out'); let g='';
+  ticks(mn,mx,5).forEach(v=>{g+=`<line x1="${Lx}" x2="${W-Rx}" y1="${Y(v)}" y2="${Y(v)}" stroke="${line}"/><text x="${Lx-10}" y="${Y(v)+5}" font-size="14" text-anchor="end" fill="${muted}">${eur(v)}</text>`;});
+  r.rows.forEach((x,i)=>{const x0=Lx+i*bw+bw*.12,ww=bw*.36; [[x.fco,ink,0],[x.fca,teal,1]].forEach(([v,c,j])=>{const y1=Y(Math.max(v,0)),h=Math.max(1,Math.abs(Y(v)-Y(0))); g+=`<rect x="${x0+j*(ww+2)}" y="${y1}" width="${ww}" height="${h}" fill="${c}" opacity="${v<0?.55:1}" stroke="${v<0?out:'none'}" stroke-width="${v<0?1.5:0}"/>`;}); g+=`<text x="${Lx+i*bw+bw/2}" y="${B+24}" font-size="14" text-anchor="middle" fill="${muted}">${MESES[i]}</text>`;});
+  g+=`<line x1="${Lx}" x2="${W-Rx}" y1="${Y(0)}" y2="${Y(0)}" stroke="${ink}" stroke-width="1.3"/>`; document.getElementById('flujos').innerHTML=g;}
+
+function drawBridge(r,s){const row=(l,v,cls='')=>`<tr class="${cls}"><td>${l}</td><td class="${v<-0.5?'neg':''}">${eur(v)}</td></tr>`;
+  const sumR=k=>r.rows.reduce((a,x)=>a+x[k],0);
+  const entradas=sumR('lpIn')+sumR('cpIn')+sumR('clIn')+r.dispFinal-r.bal.pol0;
+  const intereses=r.lp0I+r.lpNewI+r.cpI+r.clI;
+  const princ=r.rows.reduce((a,x)=>a+x.lpP,0)+r.L.reduce((a,x)=>a+x.p,0)+r.C.reduce((a,x)=>a+x.p,0)+r.CL.reduce((a,x)=>a+x.p,0);
+  const comis=(s.lp?s.lpImp*s.lpCom/100:0)+(s.cl?s.clImp*s.clCom/100:0)+r.facCost+r.intPol+r.comPol;
+  let h=row('EBITDA del año',r.ebitda)+row(`− Impuesto sobre BAII (${pct(s.tasaIS,0)} × BAII)`,-r.isBAII)+row(r.dNof>=0?'− Aumento de NOF':'+ Disminución de NOF',-r.dNof)+row('− Inversión',-s.inv);
+  if(Math.abs(r.taxDiff)>0.5) h+=row('± Diferencia entre el impuesto pagado (año anterior) y el devengado',r.taxDiff);
+  if(s.iva) h+=row('± Desfase del IVA',r.ivaEf);
+  h+=row('= FCO (flujo de caja operativo)',r.fcoAno,'t')+row('− Intereses de préstamos × (1 − t)',-(intereses-r.escudo))+row('− Devolución de principal',-princ)+row('− Comisiones, factoring e intereses de la póliza',-comis)+row('+ Entradas netas de deuda (préstamos, crowdlending y póliza)',entradas)+row('= FCA (flujo de caja del accionista)',r.fcaAno,'t')+row('− Dividendos',-s.div)+row('+ Aportaciones de capital (netas)',(s.cf?s.cfImp*(1-s.cfCom/100):0)+(s.ak?s.akImp:0))+row('= Variación de tesorería',r.tesFinal-s.tes0,'t')+row('Tesorería a 31 de diciembre',r.tesFinal);
+  document.getElementById('bridge').innerHTML=h;}
+
+function drawNof(r){const W=560,H=320,Lx=112,Rx=10,T=16,B=270; const vals=r.rows.map(x=>x.nof),mn0=Math.min(0,...vals),mx=Math.max(...vals,1)*1.08; const Y=v=>T+(mx-v)/(mx-mn0)*(B-T),bw=(W-Lx-Rx)/12,ink=css('--ink'),teal=css('--teal'),muted=css('--muted'),line=css('--line'); let g='';
+  ticks(mn0,mx,4).forEach(v=>{g+=`<line x1="${Lx}" x2="${W-Rx}" y1="${Y(v)}" y2="${Y(v)}" stroke="${line}"/><text x="${Lx-8}" y="${Y(v)+5}" font-size="14" text-anchor="end" fill="${muted}">${eur(v)}</text>`;});
+  const perm=Math.max(0,r.nofMin); r.rows.forEach((x,i)=>{const xx=Lx+i*bw+bw*.15,ww=bw*.7,p=Math.min(x.nof,perm); g+=`<rect x="${xx}" y="${Y(p)}" width="${ww}" height="${Y(0)-Y(p)}" fill="${ink}"/>`; if(x.nof>perm) g+=`<rect x="${xx}" y="${Y(x.nof)}" width="${ww}" height="${Y(perm)-Y(x.nof)}" fill="${teal}"/>`; g+=`<text x="${xx+ww/2}" y="${B+22}" font-size="14" text-anchor="middle" fill="${muted}">${MESES[i][0]}</text>`;});
+  g+=`<line x1="${Lx}" x2="${W-Rx}" y1="${Y(0)}" y2="${Y(0)}" stroke="${ink}"/><text x="${(Lx+W-Rx)/2}" y="${H-4}" font-size="14" text-anchor="middle" fill="${muted}">Permanentes: ${eur(perm)} · Estacionales: hasta ${eur(r.nofMax-perm)}</text>`; document.getElementById('nof').innerHTML=g;}
+
+function drawWhy(r,rb,s){const w=[]; const add=(x,bad)=>w.push(`<li class="${bad?'bad':''}">${x}</li>`);
+  add(`Ciclo de caja de <b>${fmt(r.ciclo)} días</b> (cobro ${fmt(s.pmc)} + existencias ${fmt(s.pme)} − pago ${fmt(s.pmp)}): ${r.ciclo>0?'la empresa adelanta ese tiempo de actividad con su propio dinero':'los proveedores financian la operativa'}.`);
+  add(`Las NOF oscilan entre ${eur(r.nofMin)} y ${eur(r.nofMax)}. La parte permanente (${eur(Math.max(0,r.nofMin))}) debería financiarse a largo plazo; la estacional (${eur(r.nofMax-Math.max(0,r.nofMin))}), con fuentes a corto como la póliza o el factoring.`);
+  if(s.fac) add(`El factoring adelanta ${eur(r.facAnt)} de cobros y reduce el saldo de clientes de ${eur(r.bal.cli1sin)} a ${eur(r.bal.cli1)}. Cuesta ${eur(r.facCost)} en el año, equivalente a un ${pct(s.facCom*360/Math.max(s.pmc,1)+s.facTipo,1)} anual frente al ${pct(s.tipo,2)} de la póliza.`);
+  if(s.cambio&&(s.pmc!==s.pmc0||s.pme!==s.pme0||s.pmp!==s.pmp0)) add(`Año de transición: los plazos pasan de ${fmt(s.pmc0)}/${fmt(s.pme0)}/${fmt(s.pmp0)} a ${fmt(s.pmc)}/${fmt(s.pme)}/${fmt(s.pmp)} días (cobro/existencias/pago). El cambio de NOF (${sgnEur(r.dNof)}) se nota este año en la caja.`, r.dNof>0);
+  if(!s.cambio&&(s.pmc!==REF.pmc||s.pme!==REF.pme||s.pmp!==REF.pmp)&&REF.ventas>0) add('Estás comparando empresas con distintos plazos de forma estable. Para ver el impacto en caja de cambiarlos este año, marca «Los plazos han cambiado respecto al año anterior».');
+  if(s.fac) add('Ojo al leer el FCO y el RCSD: el primer año de factoring libera de golpe parte del saldo de clientes. Ese efecto no se repite los años siguientes, aunque el coste sí.');
+  if(s.conf) add('El confirming no cambia tu caja: sigues pagando en la misma fecha. Financia a tus proveedores, que pueden cobrar antes. Solo te ayudaría si a cambio negocias más días de pago (deslizador «Plazo de pago a proveedores»).');
+  if(s.cp) add(`El préstamo a corto de ${eur(s.cpImp)} entra en ${MESES_L[s.cpMes]}${s.cpModo==='bullet'?` y se devuelve de golpe en ${MESES_L[Math.min(11,s.cpMes+s.cpPlazo)]}`:''}${s.cpMes+s.cpPlazo>11?' (vence después de diciembre)':''}: cubre un pico concreto, pero si vence en un mes de tensión crea otro.`, s.cpModo==='bullet'&&s.cpMes+s.cpPlazo<=11&&rb.rows[s.cpMes+s.cpPlazo].sinPol<s.minimo);
+  if(s.lp) add(`El préstamo a largo de ${eur(s.lpImp)} es financiación permanente: adecuado para la inversión y para las NOF permanentes, no para picos de unos meses.`);
+  if(s.cl) add(`El crowdlending (${pct(s.clTipo,2)} + ${pct(s.clCom,2)} de comisión) es más caro que el banco, pero más ágil y no consume riesgo bancario (CIRBE).`);
+  if(s.cf) add(`El crowdfunding de capital aporta ${eur(s.cfImp*(1-s.cfCom/100))} netos a cambio del ${pct(s.cfImp/(s.cfPre+s.cfImp)*100,1)} de la empresa, repartido entre muchos pequeños socios.`);
+  if(s.ak){const d=s.akImp/(s.akPre+s.akImp)*100;
+    if(s.akMot==='puntual') add(`Momento equivocado para ampliar capital: estás cediendo el ${pct(d,1)} de la empresa para cubrir un desfase puntual que se resolvería con factoring o una póliza.`,true);
+    else add(`La ampliación de capital aporta ${eur(s.akImp)} sin cuotas ni intereses, pero cuesta el ${pct(d,1)} de la empresa. Motivo elegido: ${document.getElementById('akMot').selectedOptions[0].text.toLowerCase()}.`);
+    if(s.akMes<3) add('Una ampliación de capital necesita acuerdo de junta, escritura e inscripción: es difícil tener el dinero en caja en menos de dos o tres meses.',true);}
+  if(r.deficit>0.5) add(`Sigue faltando caja: ${eur(r.deficit)} en ${MESES_L[r.deficitMes]}. Combina fuentes o actúa sobre los plazos del circulante.`,true);
+  if(s.iva) add(r.ivaMensual?'Con unas ventas superiores a 6.010.121,04 € la empresa tributa como gran empresa: liquida el IVA cada mes, aunque parte de las facturas aún no se hayan cobrado.':'El IVA se liquida en enero, abril, julio y octubre, aunque parte de las facturas aún no se hayan cobrado.');
+  if(s.pmp>60) add(`Pagar a proveedores a ${fmt(s.pmp)} días supera el máximo legal de 60 días entre empresas (Ley 3/2004 de lucha contra la morosidad): no es una fuente de financiación que se pueda planificar.`,true);
+  if(s.pmc>60) add(`Cobrar a ${fmt(s.pmc)} días supone que tus clientes superan el plazo legal de 60 días: además de financiarles, tienes derecho a reclamar intereses de demora.`);
+  document.getElementById('why').innerHTML=w.join('');}
+
+const GUIA=[
+ ['pol','Póliza de crédito (línea de crédito)','Bancaria · corto plazo',`<p>El banco pone a tu disposición un límite; dispones y devuelves según necesites y pagas intereses solo por lo dispuesto, más comisiones de apertura y de no disponibilidad.</p><p>Es el instrumento natural para las NOF estacionales. Su riesgo: la renovación depende del banco, que puede reducir el límite con poco preaviso.</p>`],
+ ['cp','Préstamo bancario a corto plazo','Bancaria · corto plazo',`<p>Importe cerrado que se devuelve en menos de un año, de golpe o en cuotas. Útil para un pico conocido de antemano, como una campaña o una paga extra.</p><p>Si vence en un mes de tensión, traslada el problema en lugar de resolverlo.</p>`],
+ ['fac','Factoring (anticipo de facturas)','Venta de facturas · corto plazo',`<p>Cedes tus facturas emitidas a una entidad que te adelanta su importe. En la modalidad sin recurso, el riesgo de impago pasa al factor y las facturas salen del balance: <b>el saldo de clientes se reduce</b>.</p><p>Coste: comisión por factura e interés por los días anticipados. Con muchas facturas pequeñas, resulta caro.</p><p>Con recurso, el riesgo de impago sigue siendo tuyo: contablemente es un préstamo garantizado por las facturas, que siguen en el balance junto a una deuda. El simulador modela la modalidad sin recurso.</p>`],
+ ['conf','Confirming','Gestión de pagos · no es financiación para tu empresa',`<p>Encargas al banco el pago de tus facturas a proveedores. El banco les paga al vencimiento y les ofrece cobrar antes, a su coste.</p><p><b>Para tu empresa no es una fuente de financiación a corto plazo</b>: no entra dinero y pagas en la misma fecha. Financia a tus proveedores; a ti solo te beneficia si lo usas para negociar más días de pago, siempre dentro del máximo legal de 60 días.</p><p>Excepción: si el banco paga al proveedor y tú le pagas al banco más tarde (confirming con aplazamiento), eso sí es deuda bancaria a corto y debe tratarse como tal.</p>`],
+ ['lp','Préstamo bancario a largo plazo','Bancaria · largo plazo',`<p>Importe a devolver en varios años, normalmente con cuotas constantes (sistema francés). Suele pedir garantías y un RCSD de al menos 1,5.</p><p>Es la financiación adecuada para inversiones y para la parte permanente de las NOF, que forma el fondo de maniobra.</p>`],
+ ['cl','Crowdlending','Plataforma · deuda',`<p>Préstamo financiado por muchos inversores a través de una plataforma de financiación participativa autorizada. Más rápido y flexible que el banco, sin consumir CIRBE, pero con tipos más altos y comisión de la plataforma.</p><p>Las plataformas suelen pedir dos ejercicios cerrados, cuentas depositadas y, en empresas pequeñas, avales personales.</p><p>Las plataformas se rigen por el Reglamento (UE) 2020/1503, al que se adaptó la Ley 5/2015.</p>`],
+ ['cf','Crowdfunding de capital (crowdequity)','Plataforma · capital',`<p>Muchos pequeños inversores entran en el capital a través de una plataforma. Aporta fondos propios sin cuotas, a cambio de dilución y de la comisión de la plataforma.</p><p>Habitual en startups; conviene limitar el porcentaje por inversor si no se quiere ceder el control. El crowdfunding de recompensa o donación no da participación en la empresa.</p>`],
+ ['ak','Ampliación de capital','Capital · coyuntural',`<p>Inyecta dinero real en caja, pero por su alto coste de control (dilución de los socios) y su lentitud, <b>solo tiene sentido en momentos muy concretos, nunca para el día a día</b>:</p><ul><li><b>Asfixia financiera extrema (preconcurso):</b> sin acceso a crédito bancario, para evitar la insolvencia con fondos de los socios o de un fondo de rescate.</li><li><b>Grandes oportunidades de inversión:</b> comprar un competidor o expandirse rápido, cuando un préstamo ahogaría a la empresa con las cuotas.</li><li><b>Startups y fases tempranas:</b> empresas que queman caja sin historial para que un banco les preste; rondas para cubrir los siguientes 12 a 18 meses.</li></ul><p><b>El peaje:</b> en el banco el coste es el interés; aquí, perder un trozo de tu empresa. Usarla para pagar las nóminas de este mes porque te ha fallado un cliente es malvender el futuro del negocio por un problema que resolvería un factoring o una póliza.</p><p>Además del coste de control, tiene un coste económico: la rentabilidad que exigen los socios es mayor que el tipo de interés de la deuda, porque asumen más riesgo. Por eso, según la teoría de la jerarquía financiera (pecking order), las empresas recurren primero a la autofinanciación, después a la deuda y, en último lugar, a nuevo capital.</p>`,'wide']
+];
+function drawGuide(s){document.getElementById('guide').innerHTML=GUIA.map(([k,t,tag,body,wide])=>{const cls=['gcard',wide||'',s[k]?(k==='ak'&&s.akMot==='puntual'?'alert':'on'):''].join(' ');return `<div class="${cls}"><span class="tag">${tag}</span><h3>${t}</h3>${body}</div>`;}).join('');}
+
+function drawMonth(r,s){
+  const L=[['Ventas del mes (sin IVA)',x=>x.v],['Cobros de clientes',x=>x.cobros],...(s.fac?[['   de ellos, anticipados por el factoring',x=>x.anticipo]]:[]),['− Pagos a proveedores',x=>-x.pagosProv],['− Personal',x=>-x.personal],['− Otros gastos fijos',x=>-x.otros],...(s.iva?[['− Liquidación de IVA',x=>-x.liqIVA]]:[]),['− Impuesto sobre BAII',x=>-x.isPago],['− Inversión',x=>-x.invP],['= FCO (flujo de caja operativo)',x=>x.fco,'t'],
+   ['− Préstamo que ya existía: intereses',x=>-x.lpI],['− Préstamo que ya existía: principal',x=>-x.lpP],
+   ...(s.lp?[['+ Préstamo a largo nuevo: entrada',x=>x.lpIn],['− Préstamo a largo nuevo: comisión y cuotas',x=>-x.lpOut]]:[]),
+   ...(s.cp?[['+ Préstamo a corto: entrada',x=>x.cpIn],['− Préstamo a corto: intereses y devolución',x=>-x.cpOut]]:[]),
+   ...(s.cl?[['+ Crowdlending: entrada',x=>x.clIn],['− Crowdlending: comisión y cuotas',x=>-x.clOut]]:[]),
+   ...(s.fac?[['− Coste del factoring',x=>-x.fc]]:[]),
+   ['+ Ahorro fiscal por intereses',x=>x.escM],...(s.pol?[['− Póliza: intereses y comisiones',x=>-x.pol],['+ Disposición / − devolución de póliza',x=>x.dDisp]]:[]),
+   ['= FCA (flujo de caja del accionista)',x=>x.fca,'t'],['− Dividendos',x=>-x.divM],...(s.cf?[['+ Crowdfunding de capital (neto)',x=>x.cfM]]:[]),...(s.ak?[['+ Ampliación de capital',x=>x.akM]]:[]),
+   ['= Variación de tesorería',x=>x.vt,'t'],['Tesorería al final del mes',x=>x.saldo,'t'],['Tesorería sin póliza',x=>x.sinPol],...(s.pol?[['Póliza (línea de crédito) dispuesta',x=>x.disp]]:[]),['NOF al final del mes',x=>x.nof]];
+  let h='<thead><tr><th>Euros</th>'+MESES.map(m=>`<th>${m}</th>`).join('')+'</tr></thead><tbody>';
+  L.forEach(([l,fn,cls])=>{h+=`<tr class="${cls||''}"><td>${l}</td>`+r.rows.map(x=>{const v=fn(x);return `<td class="${v<-0.5?'neg':''}">${fmt(v)}</td>`;}).join('')+'</tr>';});
+  document.getElementById('month').innerHTML=h+'</tbody>';}
+
+function load(P){ids.forEach(k=>{const el=document.getElementById(k); if(typeof P[k]==='boolean') el.checked=P[k]; else { if(R[k]){ el.max=Math.max(+el.dataset.max0, +P[k]); delete el.dataset.exact; if(+P[k]%(+el.step)!==0) el.dataset.exact=P[k]; } el.value=P[k]; }}); REF={...P}; update();}
+f.addEventListener('input',update); f.addEventListener('change',update);
+document.getElementById('cambio').addEventListener('change',e=>{ if(e.target.checked){ ['pmc','pme','pmp'].forEach(k=>{const a=document.getElementById(k), b=document.getElementById(k+'0'); b.value=a.value; if(a.dataset.exact!==undefined) b.dataset.exact=a.dataset.exact; else delete b.dataset.exact;}); update(); } });
+document.getElementById('manual').addEventListener('change',e=>{ if(e.target.checked){ const s0=read(); const r0=calc({...s0,manual:false}); const set=(k,v)=>{const el=document.getElementById(k); v=Math.round(v); if(v>+el.max) el.max=v; el.value=v; el.dataset.exact=v;};
+  set('iniExi',r0.bal.exi0); set('iniCli',r0.bal.cli0); set('iniProv',r0.bal.prov0); set('iniIVA',r0.ivaIni); set('iniIS',r0.isCash); set('polIni',0); update(); } });
+document.getElementById('blank').addEventListener('click',()=>load(BLANK));
+document.getElementById('example').addEventListener('click',()=>load(INI));
+document.getElementById('setref').addEventListener('click',()=>{REF=read(); update(); const b=document.getElementById('setref'); b.textContent='Referencia guardada ✓'; setTimeout(()=>b.textContent='Guardar como referencia',1600);});
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',update);
+new MutationObserver(update).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+load(BLANK);
+
+// ================= LABORATORIO DEL BALANCE =================
+const parseNum=t=>{let v=parseFloat(String(t).replace(/[^0-9,.\-−]/g,'').replace('−','-').replace(/\./g,'').replace(',','.')); return isNaN(v)?0:v;};
+const ACT=[['h','A) Activo no corriente'],['anc','Inmovilizado (maquinaria, instalaciones, etc.)'],['h','B) Activo corriente'],['exi','Existencias'],['cli','Deudores comerciales (clientes)'],['tes','Efectivo y otros activos líquidos (tesorería)']];
+const PAS=[['h','A) Patrimonio neto'],['cap','Capital social'],['prima','Prima de emisión'],['res','Reservas'],['rdo','Resultado del ejercicio'],['h','B) Pasivo no corriente'],['dlp','Deudas con entidades de crédito a largo plazo'],['h','C) Pasivo corriente'],['pol','Deudas con entidades de crédito a corto plazo: póliza de crédito (línea de crédito)'],['prov','Acreedores comerciales (proveedores)']];
+const KEYS=['anc','exi','cli','tes','cap','prima','res','rdo','dlp','pol','prov'];
+const LBEX={anc:1000000,exi:200000,cli:300000,tes:100000,cap:600000,prima:0,res:250000,rdo:50000,dlp:300000,pol:150000,prov:250000};
+const LB0=Object.fromEntries(KEYS.map(k=>[k,0]));
+const pnOf=b=>b.cap+b.prima+b.res+b.rdo;
+const totA=b=>b.anc+b.exi+b.cli+b.tes, totP=b=>pnOf(b)+b.dlp+b.pol+b.prov;
+let lbInit={...LBEX}, lbState={...lbInit}, lbPrev=null, lbStack=[], lbLog=[];
+const OPS={
+ cobro:{extra:null,hint:'Los clientes te pagan facturas pendientes.',f:(b,x)=>{if(x>b.cli+0.5) return 'No puedes cobrar más de lo que te deben los clientes ('+eur(b.cli)+').'; b.cli-=x; b.tes+=x; return `Cobras ${eur(x)} de clientes: <b>la tesorería aumenta</b> y el saldo de clientes disminuye en la misma cantidad. Es una permuta de activos: el activo total no cambia. Las NOF bajan ${eur(x)} y la tesorería neta sube ${eur(x)}.`;}},
+ ventaCredito:{extra:'Margen sobre coste (%)',hint:'El importe es el coste de las existencias que vendes; el precio incluye el margen.',f:(b,x,m)=>{if(x>b.exi+0.5) return 'No tienes existencias suficientes ('+eur(b.exi)+').'; const pv=x*(1+m/100); b.exi-=x; b.cli+=pv; b.rdo+=pv-x; return `Vendes a crédito por ${eur(pv)}: salen existencias por ${eur(x)} y nace un derecho de cobro de ${eur(pv)}. El beneficio (${eur(pv-x)}) aumenta el resultado del ejercicio, pero <b>la tesorería no cambia</b> hasta que cobres. Vender no es cobrar.`;}},
+ ventaContado:{extra:'Margen sobre coste (%)',hint:'El importe es el coste de las existencias que vendes.',f:(b,x,m)=>{if(x>b.exi+0.5) return 'No tienes existencias suficientes ('+eur(b.exi)+').'; const pv=x*(1+m/100); b.exi-=x; b.tes+=pv; b.rdo+=pv-x; return `Vendes al contado por ${eur(pv)}: salen existencias por ${eur(x)}, <b>la tesorería aumenta ${eur(pv)}</b> y el beneficio (${eur(pv-x)}) aumenta el resultado del ejercicio.`;}},
+ compraContado:{extra:null,hint:'Compras mercancía y la pagas en el momento.',f:(b,x)=>{if(x>b.tes+0.5) return 'No tienes tesorería suficiente ('+eur(b.tes)+'): dispón de la póliza, cobra a clientes o compra a crédito.'; b.exi+=x; b.tes-=x; return `Compras existencias al contado: <b>la tesorería disminuye ${eur(x)}</b> y las existencias aumentan lo mismo. La liquidez se convierte en stock: las NOF suben ${eur(x)} y la tesorería neta baja ${eur(x)}.`;}},
+ compraCredito:{extra:null,hint:'Compras mercancía y la pagarás más adelante.',f:(b,x)=>{b.exi+=x; b.prov+=x; return `Compras existencias a crédito: aumentan las existencias y la deuda con proveedores. <b>Hoy la tesorería no cambia</b> porque el proveedor te financia; bajará cuando pagues la factura. Las NOF no varían por ahora.`;}},
+ pagoProv:{extra:null,hint:'Pagas facturas pendientes a proveedores.',f:(b,x)=>{if(x>b.prov+0.5) return 'No debes tanto a proveedores ('+eur(b.prov)+').'; if(x>b.tes+0.5) return 'No tienes tesorería suficiente ('+eur(b.tes)+').'; b.prov-=x; b.tes-=x; return `Pagas ${eur(x)} a proveedores: <b>la tesorería disminuye</b> y la deuda con proveedores también. Las NOF suben ${eur(x)}: pierdes financiación gratuita de tus proveedores.`;}},
+ gasto:{extra:null,hint:'Nóminas, suministros u otros gastos pagados en el momento.',f:(b,x)=>{if(x>b.tes+0.5) return 'No tienes tesorería suficiente ('+eur(b.tes)+').'; b.tes-=x; b.rdo-=x; return `Pagas ${eur(x)} de gastos: <b>la tesorería disminuye</b> y el gasto reduce el resultado del ejercicio.`;}},
+ polDisp:{extra:null,hint:'Dispones de tu línea de crédito.',f:(b,x)=>{b.tes+=x; b.pol+=x; return `Dispones ${eur(x)} de la póliza: <b>la tesorería aumenta</b>, pero también la deuda a corto. La tesorería neta (tesorería − deuda a corto) <b>no cambia</b>: tienes más caja, pero prestada.`;}},
+ polDev:{extra:null,hint:'Devuelves parte de lo dispuesto.',f:(b,x)=>{if(x>b.pol+0.5) return 'No tienes tanto dispuesto ('+eur(b.pol)+').'; if(x>b.tes+0.5) return 'No tienes tesorería suficiente ('+eur(b.tes)+').'; b.tes-=x; b.pol-=x; return `Devuelves ${eur(x)} de la póliza: la tesorería y la deuda a corto bajan lo mismo. La tesorería neta no cambia.`;}},
+ factoring:{extra:'Coste del factoring (%)',hint:'Cedes facturas pendientes a un factor, que te adelanta su importe menos el coste.',f:(b,x,c)=>{if(x>b.cli+0.5) return 'No tienes tantas facturas pendientes ('+eur(b.cli)+').'; const cost=x*c/100; b.cli-=x; b.tes+=x-cost; b.rdo-=cost; return `Cedes ${eur(x)} de facturas sin recurso: <b>el saldo de clientes disminuye</b> y la tesorería aumenta ${eur(x-cost)}. El coste (${eur(cost)}) es un gasto financiero que reduce el resultado. Las NOF bajan ${eur(x)} sin aumentar la deuda.`;}},
+ inversion:{extra:null,hint:'Compras un activo fijo y lo pagas en el momento.',f:(b,x)=>{if(x>b.tes+0.5) return 'No tienes tesorería suficiente ('+eur(b.tes)+').'; b.anc+=x; b.tes-=x; return `Pagas maquinaria con tesorería: el inmovilizado sube y <b>la tesorería baja ${eur(x)}</b>. El fondo de maniobra disminuye ${eur(x)}: estás financiando una inversión a largo con recursos a corto.`;}},
+ prestamoLP:{extra:null,hint:'El banco te ingresa un préstamo a varios años.',f:(b,x)=>{b.tes+=x; b.dlp+=x; return `Recibes ${eur(x)} de préstamo a largo: <b>la tesorería aumenta</b> y también la deuda a largo. El fondo de maniobra sube ${eur(x)}: es financiación permanente, adecuada para inversiones y NOF permanentes.`;}},
+ amortLP:{extra:null,hint:'Devuelves anticipadamente parte del préstamo a largo.',f:(b,x)=>{if(x>b.dlp+0.5) return 'No debes tanto a largo plazo ('+eur(b.dlp)+').'; if(x>b.tes+0.5) return 'No tienes tesorería suficiente ('+eur(b.tes)+').'; b.dlp-=x; b.tes-=x; return `Devuelves ${eur(x)} del préstamo a largo: <b>la tesorería disminuye</b> y la deuda a largo también. El fondo de maniobra baja ${eur(x)}.`;}}
+};
+const lbInds=b=>{const ac=b.exi+b.cli+b.tes, pc=b.prov+b.pol; return {ac,pc,fm:ac-pc,nof:b.exi+b.cli-b.prov,tn:b.tes-b.pol,liq:pc>0?ac/pc:null};};
+function lbTable(spec,b,p,title,total,totalP,sub){
+  let h=`<thead><tr><th>${title}</th><th>Saldo</th><th>Cambio</th></tr></thead><tbody>`;
+  spec.forEach(([k,l])=>{ if(k==='h'){ const [lab,v,vp]=sub[l]; const d=v-vp; h+=`<tr class="s"><td>${l}</td><td>${eur(v)}</td><td class="${d>0.5?'up':d<-0.5?'dn':''}">${Math.abs(d)<0.5?'':sgnEur(d)}</td></tr>`; return; }
+    const d=b[k]-p[k]; h+=`<tr class="${Math.abs(d)>0.5?'chg':''}"><td class="ind1">${l}</td><td>${eur(b[k])}</td><td class="${d>0.5?'up':d<-0.5?'dn':''}">${Math.abs(d)<0.5?'':sgnEur(d)}</td></tr>`;});
+  const d=total-totalP; return h+`<tr class="t"><td>${title==='Activo'?'Total activo (A + B)':'Total patrimonio neto y pasivo (A + B + C)'}</td><td>${eur(total)}</td><td class="${d>0.5?'up':d<-0.5?'dn':''}">${Math.abs(d)<0.5?'':sgnEur(d)}</td></tr></tbody>`;}
+function lbRender(){
+  const b=lbState, p=lbPrev||lbState, I=lbInds(b), Ip=lbInds(p);
+  document.getElementById('lbA').innerHTML=lbTable(ACT,b,p,'Activo',totA(b),totA(p),{'A) Activo no corriente':[0,b.anc,p.anc],'B) Activo corriente':[0,I.ac,Ip.ac]});
+  document.getElementById('lbP').innerHTML=lbTable(PAS,b,p,'Patrimonio neto y pasivo',totP(b),totP(p),{'A) Patrimonio neto':[0,pnOf(b),pnOf(p)],'B) Pasivo no corriente':[0,b.dlp,p.dlp],'C) Pasivo corriente':[0,I.pc,Ip.pc]});
+  const ind=(n,v,vp,f)=>{const d=v===null||vp===null?0:v-vp; return `<div class="ind"><div class="n">${n}</div><div class="v">${v===null?'—':f(v)}</div><div class="d" style="color:${Math.abs(d)<0.005?css('--muted'):(d>0?css('--ok'):css('--out'))}">${Math.abs(d)<0.005?'&nbsp;':(d>0?'▲ ':'▼ ')+(f===eur?sgnEur(d):(d>0?'+':'−')+fmt(Math.abs(d),2))}</div></div>`;};
+  document.getElementById('lbInd').innerHTML=ind('Tesorería',b.tes,p.tes,eur)+ind('NOF',I.nof,Ip.nof,eur)+ind('Fondo de maniobra',I.fm,Ip.fm,eur)+ind('Tesorería neta',I.tn,Ip.tn,eur)+ind('Ratio de liquidez (AC / PC)',I.liq,Ip.liq,v=>fmt(v,2));
+  document.getElementById('lbId').innerHTML=`Comprobación: activo ${eur(totA(b))} = patrimonio neto y pasivo ${eur(totP(b))} ${Math.abs(totA(b)-totP(b))<0.5?'✓':'✗'} · Tesorería neta ${eur(I.tn)} = fondo de maniobra ${eur(I.fm)} − NOF ${eur(I.nof)} ✓`;
+  document.getElementById('lbHist').innerHTML=lbLog.length?lbLog.map(x=>`<li>${x}</li>`).join(''):'<li>Todavía no hay operaciones.</li>';
+  lbDrawSvg(b); plRender();
+}
+function lbDrawSvg(b){const W=700,H=360,T=24,B=330; const pn=pnOf(b); const tot=Math.max(totA(b), Math.max(pn,0)+b.dlp+b.prov+b.pol, 1);
+  const segA=[['Activo no corriente',b.anc,'#8a8f9c'],['Existencias',b.exi,'#c8962a'],['Clientes',b.cli,'#00a3ae'],['Tesorería',b.tes,'#1f7a55']];
+  const segP=[['Patrimonio neto',pn,'#06323c'],['Pasivo no corriente',b.dlp,'#4f6970'],['Póliza de crédito',b.pol,'#e07a5f'],['Proveedores',b.prov,'#c0392b']];
+  const col=(x,segs,title)=>{let y=T, g=`<text x="${x+110}" y="${T-6}" font-size="15" font-weight="700" text-anchor="middle" fill="${css('--ink')}">${title}</text>`;
+    segs.forEach(([l,v,c])=>{ if(v<=0.5) return; const h=v/tot*(B-T); g+=`<rect x="${x}" y="${y}" width="220" height="${h}" fill="${c}" stroke="${css('--paper')}"/>`; if(h>18) g+=`<text x="${x+110}" y="${y+h/2+5}" font-size="14" text-anchor="middle" fill="#fff">${l}: ${eur(v)}</text>`; y+=h;});
+    return g;};
+  let g=col(80,segA,'Activo')+col(400,segP,'Patrimonio neto y pasivo');
+  if(pn<0) g+=`<text x="510" y="${B+22}" font-size="14" text-anchor="middle" fill="${css('--out')}">Patrimonio neto negativo: ${eur(pn)}</text>`;
+  if(totA(b)<=0.5) g+=`<text x="350" y="180" font-size="16" text-anchor="middle" fill="${css('--muted')}">Rellena el balance de partida</text>`;
+  document.getElementById('lbSvg').innerHTML=g;}
+function plRender(){const v=parseNum(document.getElementById('p_v').value), c=parseNum(document.getElementById('p_c').value)/100, pmc=parseNum(document.getElementById('p_pmc').value), pme=parseNum(document.getElementById('p_pme').value), pmp=parseNum(document.getElementById('p_pmp').value), fm=parseNum(document.getElementById('p_fm').value);
+  const calcP=d=>{const cli=v*d/365, exi=v*c*pme/365, prov=v*c*pmp/365, nof=cli+exi-prov; return {cli,exi,prov,nof,tn:fm-nof};};
+  const r=calcP(pmc); const row=(l,x,cls='')=>`<tr class="${cls}"><td>${l}</td><td class="${x<-0.5?'dn':''}">${eur(x)}</td></tr>`;
+  document.getElementById('plTab').innerHTML='<tbody>'+row(`Clientes = ventas × ${fmt(pmc)} / 365`,r.cli)+row(`+ Existencias = coste × ${fmt(pme)} / 365`,r.exi)+row(`− Proveedores = compras × ${fmt(pmp)} / 365`,-r.prov)+row('= NOF',r.nof,'t')+row('Fondo de maniobra',fm)+row('Tesorería neta = FM − NOF',r.tn,'t')+`<tr><td colspan="2" class="hint" style="text-align:left;white-space:normal">Cada día más de cobro inmoviliza ${eur(v/365)} en clientes y reduce la tesorería neta en esa misma cantidad.</td></tr></tbody>`;
+  const W=520,H=300,L=100,R=12,T=14,B=250; const xs=[]; for(let d=0;d<=150;d+=5) xs.push(d); const ys=xs.map(d=>calcP(d).tn);
+  let mn=Math.min(0,...ys),mx=Math.max(0,...ys); const pad=(mx-mn)*.08||1e4; mn-=pad; mx+=pad;
+  const X=d=>L+d/150*(W-L-R), Y=y=>T+(mx-y)/(mx-mn)*(B-T), muted=css('--muted'), line=css('--line'), ink=css('--ink');
+  let g=''; ticks(mn,mx,4).forEach(y=>{g+=`<line x1="${L}" x2="${W-R}" y1="${Y(y)}" y2="${Y(y)}" stroke="${line}"/><text x="${L-8}" y="${Y(y)+5}" font-size="13" text-anchor="end" fill="${muted}">${eur(y)}</text>`;});
+  [0,30,60,90,120,150].forEach(d=>g+=`<text x="${X(d)}" y="${B+20}" font-size="13" text-anchor="middle" fill="${muted}">${d}</text>`);
+  g+=`<text x="${(L+W-R)/2}" y="${H-6}" font-size="13" text-anchor="middle" fill="${muted}">Días de cobro</text><line x1="${L}" x2="${W-R}" y1="${Y(0)}" y2="${Y(0)}" stroke="${ink}"/>`;
+  g+=`<polyline fill="none" stroke="${css('--teal')}" stroke-width="3" points="${xs.map((d,i)=>X(d)+','+Y(ys[i])).join(' ')}"/><circle cx="${X(Math.min(pmc,150))}" cy="${Y(r.tn)}" r="6" fill="${r.tn<0?css('--out'):ink}"/>`;
+  document.getElementById('plSvg').innerHTML=g;}
+// formulario del balance de partida
+function bfBuild(){
+  const mk=(spec,title)=>{let h=`<thead><tr><th>${title}</th><th>Importe (€)</th></tr></thead><tbody>`;
+    spec.forEach(([k,l])=>{ h+= k==='h' ? `<tr class="h"><td colspan="2">${l}</td></tr>` : `<tr><td class="ind1"><label for="bf_${k}">${l}</label></td><td><input id="bf_${k}" inputmode="decimal" value="0"></td></tr>`;});
+    return h+`<tr class="t"><td>${title==='Activo'?'Total activo':'Total patrimonio neto y pasivo'}</td><td id="bfT_${title==='Activo'?'A':'P'}">0 €</td></tr></tbody>`;};
+  document.getElementById('bfA').innerHTML=mk(ACT,'Activo'); document.getElementById('bfP').innerHTML=mk(PAS,'Patrimonio neto y pasivo');
+  KEYS.forEach(k=>{const el=document.getElementById('bf_'+k); el.addEventListener('input',bfCheck); el.addEventListener('blur',()=>{el.value=fmt(parseNum(el.value)); bfCheck();});});
+}
+const bfRead=()=>Object.fromEntries(KEYS.map(k=>[k,parseNum(document.getElementById('bf_'+k).value)]));
+function bfFill(b){KEYS.forEach(k=>document.getElementById('bf_'+k).value=fmt(b[k])); bfCheck();}
+function bfCheck(){const b=bfRead(), a=totA(b), p=totP(b), d=a-p; document.getElementById('bfT_A').textContent=eur(a); document.getElementById('bfT_P').textContent=eur(p);
+  const el=document.getElementById('bfCheck'); const ok=Math.abs(d)<0.5;
+  el.className='identity '+(ok?'good':'bad'); el.innerHTML= ok ? `El balance cuadra: activo ${eur(a)} = patrimonio neto y pasivo ${eur(p)} ✓` : `El balance no cuadra: el activo ${d>0?'supera':'es inferior'} al patrimonio neto y el pasivo en ${eur(Math.abs(d))}. Revisa las partidas${d>0?' (por ejemplo, las reservas o el resultado)':''}.`;
+  document.getElementById('balApply').disabled=!ok; return ok;}
+function lbSetInit(b){lbInit={...b}; lbState={...lbInit}; lbPrev=null; lbStack=[]; lbLog=[]; const m=document.getElementById('opMsg'); m.className='opmsg'; m.textContent='Balance de partida cargado. Registra una operación o una ampliación de capital.'; lbRender();}
+function lbOpUI(){const o=OPS[document.getElementById('op').value]; document.getElementById('opExtraBox').style.visibility=o.extra?'visible':'hidden'; if(o.extra){document.getElementById('opExtraLab').textContent=o.extra; const e=document.getElementById('opExtra'); if(!e.dataset.touched) e.value=o.extra.startsWith('Coste')?'2':'25';} document.getElementById('opHint').textContent=o.hint;}
+function lbCommit(nb,label,out){lbStack.push({st:{...lbState},prev:lbPrev,log:[...lbLog]}); lbPrev={...lbState}; lbState=nb; lbLog.push(label); const m=document.getElementById('opMsg'); m.className='opmsg'; m.innerHTML=out; lbRender();}
+function lbErr(t){const m=document.getElementById('opMsg'); m.className='opmsg err'; m.textContent=t;}
+document.getElementById('op').addEventListener('change',()=>{delete document.getElementById('opExtra').dataset.touched; lbOpUI();});
+document.getElementById('opExtra').addEventListener('input',e=>e.target.dataset.touched='1');
+document.getElementById('opGo').addEventListener('click',()=>{const k=document.getElementById('op').value, x=parseNum(document.getElementById('opImp').value), m=parseNum(document.getElementById('opExtra').value);
+  if(!(x>0)) return lbErr('Escribe un importe mayor que cero.'); const nb={...lbState}; const out=OPS[k].f(nb,x,m); if(out.startsWith('No ')) return lbErr(out);
+  lbCommit(nb, document.getElementById('op').selectedOptions[0].text+': '+eur(x), out);});
+document.getElementById('akGo').addEventListener('click',()=>{const t=document.getElementById('akTipo').value, nom=parseNum(document.getElementById('akNom').value), pr=Math.max(0,parseNum(document.getElementById('akPrima').value)), tot=nom+pr;
+  if(!(nom>0)) return lbErr('Escribe el importe de capital (valor nominal) de la ampliación.'); const b={...lbState};
+  let out;
+  if(t==='dineraria'){ b.tes+=tot; out=`Ampliación dineraria de ${eur(tot)}: <b>la tesorería aumenta</b> y el patrimonio neto también (capital ${sgnEur(nom)}${pr?`, prima de emisión ${sgnEur(pr)}`:''}). El fondo de maniobra y la tesorería neta suben ${eur(tot)} sin crear deuda, a cambio de dar entrada a nuevos socios o de diluir a los actuales.`; }
+  else if(t==='compLP'){ if(tot>b.dlp+0.5) return lbErr('No hay tanta deuda a largo plazo que convertir ('+eur(b.dlp)+').'); b.dlp-=tot; out=`Ampliación por compensación de créditos: ${eur(tot)} de deuda a largo se convierten en capital. <b>La tesorería no cambia</b>; la empresa se desendeuda y el patrimonio neto sube. El fondo de maniobra no varía, porque la deuda a largo ya era financiación permanente.`; }
+  else if(t==='compCP'){ if(tot>b.pol+0.5) return lbErr('No hay tanta póliza dispuesta que convertir ('+eur(b.pol)+').'); b.pol-=tot; out=`Ampliación por compensación de créditos: ${eur(tot)} de la póliza se convierten en capital. <b>La tesorería no cambia</b>, pero baja la deuda a corto: el fondo de maniobra y la tesorería neta suben ${eur(tot)}.`; }
+  else { b.anc+=tot; out=`Ampliación no dineraria: los socios aportan bienes por ${eur(tot)}. Sube el inmovilizado y el patrimonio neto; <b>la tesorería no cambia</b> y el fondo de maniobra tampoco.`; }
+  b.cap+=nom; b.prima+=pr;
+  lbCommit(b,'Ampliación de capital ('+document.getElementById('akTipo').selectedOptions[0].text.split(':')[0].toLowerCase()+'): '+eur(tot),out);});
+document.getElementById('opUndo').addEventListener('click',()=>{const z=lbStack.pop(); if(!z) return; lbState=z.st; lbPrev=z.prev; lbLog=z.log; const m=document.getElementById('opMsg'); m.className='opmsg'; m.textContent='Operación deshecha.'; lbRender();});
+document.getElementById('opReset').addEventListener('click',()=>lbSetInit(lbInit));
+document.getElementById('balApply').addEventListener('click',()=>{ if(bfCheck()) lbSetInit(bfRead()); });
+document.getElementById('balZero').addEventListener('click',()=>{bfFill(LB0); lbSetInit(LB0);});
+document.getElementById('balEx').addEventListener('click',()=>{bfFill(LBEX); lbSetInit(LBEX);});
+['p_v','p_c','p_pmc','p_pme','p_pmp','p_fm'].forEach(id=>document.getElementById(id).addEventListener('input',plRender));
+['opImp','akNom','akPrima','p_v','p_fm'].forEach(id=>document.getElementById(id).addEventListener('blur',e=>{e.target.value=fmt(parseNum(e.target.value));}));
+function showTab(lab){document.getElementById('viewLab').hidden=!lab; document.getElementById('viewPres').hidden=lab; document.querySelector('header .btns').style.visibility=lab?'hidden':'visible';
+  document.getElementById('tabLab').setAttribute('aria-selected',lab); document.getElementById('tabPres').setAttribute('aria-selected',!lab); if(lab) lbRender(); else update();}
+document.getElementById('tabPres').addEventListener('click',()=>showTab(false));
+document.getElementById('tabLab').addEventListener('click',()=>showTab(true));
+bfBuild(); bfFill(LBEX); lbOpUI(); lbSetInit(LBEX);
+</script>
+</body>
+</html>
