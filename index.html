@@ -83,6 +83,14 @@ table.bridge{width:100%; border-collapse:collapse; font-size:15.5px}
 table.bridge td{padding:7px 0; border-bottom:1px solid var(--line)}
 table.bridge td:last-child{text-align:right; font-weight:650; white-space:nowrap}
 table.bridge tr.t td{font-weight:800; border-bottom:0; border-top:2px solid var(--ink)}
+table.bridge tr.sub td{font-size:13.5px; color:var(--muted,#5b6b70); padding:3px 0 3px 14px}
+table.bridge tr.e td{background:rgba(2,163,173,.08)}
+.pygcmp{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px}
+.pygcmp div{border:1px solid var(--line); border-radius:10px; padding:10px 12px}
+.pygcmp div b{display:block; font-size:18px; margin-top:4px}
+.pygcmp small{font-size:13px}
+.pygcmp p{grid-column:1/-1; margin:2px 0 0; font-size:14.5px; line-height:1.45}
+@media (max-width:600px){.pygcmp{grid-template-columns:1fr}}
 table.month{border-collapse:collapse; font-size:14px; min-width:1100px; width:100%}
 table.month th, table.month td{padding:6px 8px; text-align:right; white-space:nowrap; border-bottom:1px solid var(--line)}
 table.month th:first-child, table.month td:first-child{text-align:left; position:sticky; left:0; background:var(--paper)}
@@ -202,6 +210,7 @@ table.lb td.ind1{padding-left:18px}
   <div class="row"><label for="perfil">Estacionalidad</label><select id="perfil"><option value="plana">Ventas planas todo el año</option><option value="verano">Campaña de verano</option><option value="final">Campaña de final de año</option></select></div>
   <div class="row"><label for="intens">Intensidad de la estacionalidad</label><output for="intens"></output><input type="range" id="intens"></div>
   <div class="row"><label for="compras">Compras de materiales</label><output for="compras"></output><input type="range" id="compras"></div><div class="row"><label for="personal">Gastos de personal anuales (14 pagas)</label><output for="personal"></output><input type="range" id="personal"></div><div class="row"><label for="otros">Otros gastos fijos anuales</label><output for="otros"></output><input type="range" id="otros"></div>
+  <div class="row chk"><label for="nom"><input type="checkbox" id="nom"> Detallar nóminas: retenciones de IRPF y Seguridad Social</label></div><fieldset class="params" id="p_nom"><div class="row"><label for="irpf">Retención media de IRPF</label><output for="irpf"></output><input type="range" id="irpf"></div><div class="row"><label for="ssEmp">Seguridad Social a cargo de la empresa</label><output for="ssEmp"></output><input type="range" id="ssEmp"></div><p class="hint">Se paga el neto cada mes, la Seguridad Social al mes siguiente y las retenciones en la liquidación trimestral (mensual si las ventas superan 6.010.121,04 €).</p></fieldset>
   <div class="derived" aria-live="polite"><table id="ebitdaCalc"></table></div>
  </details>
  <details class="grp"><summary>Plazos del circulante</summary>
@@ -211,7 +220,7 @@ table.lb td.ind1{padding-left:18px}
   <fieldset class="params" id="p_prev"><div class="row"><label for="pmc0">Cobro a clientes el año anterior</label><output for="pmc0"></output><input type="range" id="pmc0"></div><div class="row"><label for="pme0">Existencias el año anterior</label><output for="pme0"></output><input type="range" id="pme0"></div><div class="row"><label for="pmp0">Pago a proveedores el año anterior</label><output for="pmp0"></output><input type="range" id="pmp0"></div></fieldset>
  </details>
  <details class="grp"><summary>Inversión, deuda actual e impuestos</summary>
-  <div class="row"><label for="inv">Inversión en maquinaria (sin IVA)</label><output for="inv"></output><input type="range" id="inv"></div><div class="row"><label for="invMes">Mes de pago de la inversión</label><select id="invMes"></select></div>
+  <div class="row"><label for="anc0">Inmovilizado neto a 1 de enero</label><output for="anc0"></output><input type="range" id="anc0"></div><div class="row"><label for="inv">Inversión en maquinaria (sin IVA)</label><output for="inv"></output><input type="range" id="inv"></div><div class="row"><label for="invMes">Mes de pago de la inversión</label><select id="invMes"></select></div>
   <div class="row"><label for="deudaLP">Préstamo a largo que ya tiene la empresa</label><output for="deudaLP"></output><input type="range" id="deudaLP"></div><div class="row"><label for="tipoLP">Tipo de interés de ese préstamo</label><output for="tipoLP"></output><input type="range" id="tipoLP"></div><div class="row"><label for="plazoLP">Plazo pendiente de ese préstamo</label><output for="plazoLP"></output><input type="range" id="plazoLP"></div>
   <p class="hint" id="cuotaTxt"></p>
   <div class="row"><label for="amort">Amortización anual</label><output for="amort"></output><input type="range" id="amort"></div><div class="row"><label for="tasaIS">Tipo del impuesto sobre beneficios</label><output for="tasaIS"></output><input type="range" id="tasaIS"></div>
@@ -231,11 +240,21 @@ table.lb td.ind1{padding-left:18px}
   <p class="subhead">Bancarias a corto plazo</p>
   <details class="src" id="d_pol"><summary><span>Póliza de crédito (línea de crédito)</span><span class="badge" id="b_pol">Desactivada</span></summary><div class="row chk"><label for="pol"><input type="checkbox" id="pol"> Usar esta fuente</label></div><fieldset class="params" id="p_pol"><div class="row"><label for="limite">Límite de la póliza</label><output for="limite"></output><input type="range" id="limite"></div><div class="row"><label for="tipo">Tipo de interés</label><output for="tipo"></output><input type="range" id="tipo"></div><div class="row"><label for="polAper">Comisión de apertura (sobre el límite)</label><output for="polAper"></output><input type="range" id="polAper"></div><div class="row"><label for="polND">Comisión de no disponibilidad (anual)</label><output for="polND"></output><input type="range" id="polND"></div></fieldset></details>
   <details class="src" id="d_cp"><summary><span>Préstamo bancario a corto plazo</span><span class="badge" id="b_cp">Desactivada</span></summary><div class="row chk"><label for="cp"><input type="checkbox" id="cp"> Usar esta fuente</label></div><fieldset class="params" id="p_cp"><div class="row"><label for="cpImp">Importe</label><output for="cpImp"></output><input type="range" id="cpImp"></div><div class="row"><label for="cpMes">Mes de entrada</label><select id="cpMes"></select></div><div class="row"><label for="cpTipo">Tipo de interés</label><output for="cpTipo"></output><input type="range" id="cpTipo"></div><div class="row"><label for="cpPlazo">Plazo</label><output for="cpPlazo"></output><input type="range" id="cpPlazo"></div><div class="row"><label for="cpModo">Devolución</label><select id="cpModo"><option value="bullet">Todo al vencimiento</option><option value="cuotas">Cuotas mensuales</option></select></div></fieldset></details>
+  <details class="src" id="d_desc"><summary><span>Descuento comercial de efectos</span><span class="badge" id="b_desc">Desactivada</span></summary><div class="row chk"><label for="desc"><input type="checkbox" id="desc"> Usar esta fuente</label></div><fieldset class="params" id="p_desc"><div class="row"><label for="descPct">Facturación documentada en efectos descontados</label><output for="descPct"></output><input type="range" id="descPct"></div><div class="row"><label for="descCom">Comisión por efecto</label><output for="descCom"></output><input type="range" id="descCom"></div><div class="row"><label for="descTipo">Interés por los días anticipados</label><output for="descTipo"></output><input type="range" id="descTipo"></div><div class="row"><label for="descMes">Desde el mes</label><select id="descMes"></select></div></fieldset></details>
   <details class="src" id="d_fac"><summary><span>Factoring (anticipo de facturas)</span><span class="badge" id="b_fac">Desactivada</span></summary><div class="row chk"><label for="fac"><input type="checkbox" id="fac"> Usar esta fuente</label></div><fieldset class="params" id="p_fac"><div class="row"><label for="facPct">Facturación cedida al factor</label><output for="facPct"></output><input type="range" id="facPct"></div><div class="row"><label for="facCom">Comisión sobre cada factura</label><output for="facCom"></output><input type="range" id="facCom"></div><div class="row"><label for="facTipo">Interés por los días anticipados</label><output for="facTipo"></output><input type="range" id="facTipo"></div><div class="row"><label for="facMes">Desde el mes</label><select id="facMes"></select></div></fieldset></details>
   <details class="src" id="d_conf"><summary><span>Confirming</span><span class="badge" id="b_conf">Desactivada</span></summary><div class="row chk"><label for="conf"><input type="checkbox" id="conf"> Usar esta fuente</label></div><fieldset class="params" id="p_conf"><p class="hint">Servicio de gestión de pagos a proveedores. Actívalo para comprobar su efecto en tu caja.</p></fieldset></details>
+  <p class="subhead">Mercados de capitales y titulización</p>
+  <details class="src" id="d_tit"><summary><span>Titulización de facturas (fondo de titulización)</span><span class="badge" id="b_tit">Desactivada</span></summary><div class="row chk"><label for="tit"><input type="checkbox" id="tit"> Usar esta fuente</label></div><fieldset class="params" id="p_tit"><div class="row"><label for="titPct">Facturación cedida al fondo</label><output for="titPct"></output><input type="range" id="titPct"></div><div class="row"><label for="titTipo">Coste por los días anticipados</label><output for="titTipo"></output><input type="range" id="titTipo"></div><div class="row"><label for="titCom">Comisión de estructuración y gestión</label><output for="titCom"></output><input type="range" id="titCom"></div><div class="row"><label for="titRes">Reserva que retiene el fondo</label><output for="titRes"></output><input type="range" id="titRes"></div><div class="row"><label for="titMes">Desde el mes</label><select id="titMes"></select></div></fieldset></details>
+  <details class="src" id="d_mp"><summary><span>Pagarés en el MARF</span><span class="badge" id="b_mp">Desactivada</span></summary><div class="row chk"><label for="mp"><input type="checkbox" id="mp"> Usar esta fuente</label></div><fieldset class="params" id="p_mp"><div class="row"><label for="mpImp">Importe emitido</label><output for="mpImp"></output><input type="range" id="mpImp"></div><div class="row"><label for="mpMes">Mes de emisión</label><select id="mpMes"></select></div><div class="row"><label for="mpPlazo">Plazo</label><output for="mpPlazo"></output><input type="range" id="mpPlazo"></div><div class="row"><label for="mpTipo">Tipo de interés</label><output for="mpTipo"></output><input type="range" id="mpTipo"></div><div class="row"><label for="mpCost">Costes de emisión (asesor, documentación)</label><output for="mpCost"></output><input type="range" id="mpCost"></div></fieldset></details>
+  <details class="src" id="d_mb"><summary><span>Bonos en el MARF</span><span class="badge" id="b_mb">Desactivada</span></summary><div class="row chk"><label for="mb"><input type="checkbox" id="mb"> Usar esta fuente</label></div><fieldset class="params" id="p_mb"><div class="row"><label for="mbImp">Importe emitido</label><output for="mbImp"></output><input type="range" id="mbImp"></div><div class="row"><label for="mbMes">Mes de emisión</label><select id="mbMes"></select></div><div class="row"><label for="mbPlazo">Plazo</label><output for="mbPlazo"></output><input type="range" id="mbPlazo"></div><div class="row"><label for="mbTipo">Cupón anual</label><output for="mbTipo"></output><input type="range" id="mbTipo"></div><div class="row"><label for="mbCost">Costes de emisión (asesor, rating, documentación)</label><output for="mbCost"></output><input type="range" id="mbCost"></div></fieldset></details>
   <p class="subhead">A largo plazo y alternativas</p>
   <details class="src" id="d_lp"><summary><span>Préstamo bancario a largo plazo</span><span class="badge" id="b_lp">Desactivada</span></summary><div class="row chk"><label for="lp"><input type="checkbox" id="lp"> Usar esta fuente</label></div><fieldset class="params" id="p_lp"><div class="row"><label for="lpImp">Importe</label><output for="lpImp"></output><input type="range" id="lpImp"></div><div class="row"><label for="lpMes">Mes de entrada</label><select id="lpMes"></select></div><div class="row"><label for="lpTipo">Tipo de interés</label><output for="lpTipo"></output><input type="range" id="lpTipo"></div><div class="row"><label for="lpPlazo">Plazo</label><output for="lpPlazo"></output><input type="range" id="lpPlazo"></div><div class="row"><label for="lpCom">Comisión de apertura</label><output for="lpCom"></output><input type="range" id="lpCom"></div></fieldset></details>
+  <details class="src" id="d_leas"><summary><span>Leasing de la maquinaria</span><span class="badge" id="b_leas">Desactivada</span></summary><div class="row chk"><label for="leas"><input type="checkbox" id="leas"> Usar esta fuente</label></div><fieldset class="params" id="p_leas"><div class="row"><label for="leasPct">Parte de la inversión financiada</label><output for="leasPct"></output><input type="range" id="leasPct"></div><div class="row"><label for="leasTipo">Tipo de interés</label><output for="leasTipo"></output><input type="range" id="leasTipo"></div><div class="row"><label for="leasPlazo">Plazo</label><output for="leasPlazo"></output><input type="range" id="leasPlazo"></div><p class="hint">Financia la inversión de «Inversión, deuda actual e impuestos» en su mes de pago.</p></fieldset></details>
+  <details class="src" id="d_lb"><summary><span>Sale and lease back</span><span class="badge" id="b_lb">Desactivada</span></summary><div class="row chk"><label for="lb"><input type="checkbox" id="lb"> Usar esta fuente</label></div><fieldset class="params" id="p_lb"><div class="row"><label for="lbImp">Importe de la venta del activo</label><output for="lbImp"></output><input type="range" id="lbImp"></div><div class="row"><label for="lbMes">Mes de la operación</label><select id="lbMes"></select></div><div class="row"><label for="lbTipo">Tipo de interés implícito</label><output for="lbTipo"></output><input type="range" id="lbTipo"></div><div class="row"><label for="lbPlazo">Plazo del arrendamiento</label><output for="lbPlazo"></output><input type="range" id="lbPlazo"></div></fieldset></details>
   <details class="src" id="d_cl"><summary><span>Crowdlending (préstamo vía plataforma)</span><span class="badge" id="b_cl">Desactivada</span></summary><div class="row chk"><label for="cl"><input type="checkbox" id="cl"> Usar esta fuente</label></div><fieldset class="params" id="p_cl"><div class="row"><label for="clImp">Importe</label><output for="clImp"></output><input type="range" id="clImp"></div><div class="row"><label for="clMes">Mes de entrada</label><select id="clMes"></select></div><div class="row"><label for="clTipo">Tipo de interés</label><output for="clTipo"></output><input type="range" id="clTipo"></div><div class="row"><label for="clPlazo">Plazo</label><output for="clPlazo"></output><input type="range" id="clPlazo"></div><div class="row"><label for="clCom">Comisión de la plataforma</label><output for="clCom"></output><input type="range" id="clCom"></div></fieldset></details>
+  <p class="subhead">Alternativas operativas y fiscales</p>
+  <details class="src" id="d_rent"><summary><span>Renting en lugar de comprar la maquinaria</span><span class="badge" id="b_rent">Desactivada</span></summary><div class="row chk"><label for="rent"><input type="checkbox" id="rent"> Usar esta fuente</label></div><fieldset class="params" id="p_rent"><div class="row"><label for="rentPct">Cuota anual (% del valor de la máquina)</label><output for="rentPct"></output><input type="range" id="rentPct"></div><p class="hint">La empresa no compra la maquinaria: paga una cuota mensual que incluye el uso y el mantenimiento.</p></fieldset></details>
+  <details class="src" id="d_apz"><summary><span>Aplazamiento del impuesto sobre beneficios</span><span class="badge" id="b_apz">Desactivada</span></summary><div class="row chk"><label for="apz"><input type="checkbox" id="apz"> Usar esta fuente</label></div><fieldset class="params" id="p_apz"><div class="row"><label for="apzMeses">Meses de aplazamiento</label><output for="apzMeses"></output><input type="range" id="apzMeses"></div><div class="row"><label for="apzTipo">Interés de demora</label><output for="apzTipo"></output><input type="range" id="apzTipo"></div></fieldset></details>
   <p class="subhead">Capital</p>
   <details class="src" id="d_cf"><summary><span>Crowdfunding de capital (crowdequity)</span><span class="badge" id="b_cf">Desactivada</span></summary><div class="row chk"><label for="cf"><input type="checkbox" id="cf"> Usar esta fuente</label></div><fieldset class="params" id="p_cf"><div class="row"><label for="cfImp">Importe captado</label><output for="cfImp"></output><input type="range" id="cfImp"></div><div class="row"><label for="cfMes">Mes de desembolso</label><select id="cfMes"></select></div><div class="row"><label for="cfPre">Valoración de la empresa antes de la ronda</label><output for="cfPre"></output><input type="range" id="cfPre"></div><div class="row"><label for="cfCom">Comisión de la plataforma</label><output for="cfCom"></output><input type="range" id="cfCom"></div></fieldset></details>
   <details class="src" id="d_ak"><summary><span>Ampliación de capital</span><span class="badge" id="b_ak">Desactivada</span></summary><div class="row chk"><label for="ak"><input type="checkbox" id="ak"> Usar esta fuente</label></div><fieldset class="params" id="p_ak"><div class="row"><label for="akImp">Importe</label><output for="akImp"></output><input type="range" id="akImp"></div><div class="row"><label for="akMes">Mes de desembolso</label><select id="akMes"></select></div><div class="row"><label for="akPre">Valoración de la empresa antes de la ampliación</label><output for="akPre"></output><input type="range" id="akPre"></div><div class="row"><label for="akMot">Motivo de la ampliación</label><select id="akMot"><option value="oportunidad">Gran oportunidad de inversión o crecimiento</option><option value="asfixia">Asfixia financiera sin acceso a crédito</option><option value="startup">Empresa joven sin historial crediticio</option><option value="puntual">Cubrir un desfase puntual de caja (nóminas, un cliente que falla)</option></select></div></fieldset></details>
@@ -262,14 +281,20 @@ table.lb td.ind1{padding-left:18px}
     <div class="scroll"><table class="src" id="srcTable"></table></div>
   </section>
   <section class="card">
-      <h2>Circulante y financiación en el balance</h2>
-      <p class="note">Saldos a 1 de enero y a 31 de diciembre. Clientes y proveedores, con IVA. La deuda a largo se muestra completa como no corriente.</p>
+      <h2>Balance a 1 de enero y a 31 de diciembre</h2>
+      <p class="note">Con la estructura del Plan General de Contabilidad. Clientes y proveedores, con IVA.</p>
       <div class="scroll"><table class="bal" id="balance"></table></div>
     </section>
     <section class="card">
       <h2>Viabilidad financiera</h2>
       <p class="note">Referencias: RCSD y RCSD ajustado de al menos 1,5; Deuda neta/EBITDA en alerta por encima de 2,5-3.</p>
       <div class="ratios" id="ratios"></div>
+    </section>
+    <section class="card">
+      <h2>Rentabilidad económica y financiera</h2>
+      <p class="note">ROA (rentabilidad económica) = BAII / activo medio. ROE (rentabilidad financiera) = beneficio neto / patrimonio neto medio. La deuda mejora la ROE si la ROA supera su coste (apalancamiento positivo) y la empeora si no.</p>
+      <div class="kpis" id="rentK" style="grid-template-columns:repeat(3,1fr)"></div>
+      <ul class="why" id="rentWhy" style="margin-top:14px"></ul>
     </section>
   <section class="card">
     <h2>FCO y FCA mes a mes</h2>
@@ -279,10 +304,18 @@ table.lb td.ind1{padding-left:18px}
   </section>
   <div class="two">
     <section class="card">
+      <h2>Cuenta de resultados</h2>
+      <p class="note">Modelo abreviado del Plan General de Contabilidad para el año. Mide el beneficio por devengo: ingresos y gastos cuando se producen, no cuando se cobran o se pagan.</p>
+      <table class="bridge" id="pyg"></table>
+      <div class="pygcmp" id="pygCmp"></div>
+    </section>
+    <section class="card">
       <h2>Del EBITDA al FCO y al FCA</h2>
       <p class="note">El EBITDA no es caja: las NOF, los impuestos y la inversión lo separan del FCO; la financiación, del FCA.</p>
       <table class="bridge" id="bridge"></table>
     </section>
+  </div>
+  <div>
     <section class="card">
       <h2>Necesidades operativas de fondos</h2>
       <p class="note">NOF = clientes + existencias − proveedores, sin IVA, al final de cada mes. La parte permanente pide financiación a largo; la estacional, a corto.</p>
@@ -423,28 +456,42 @@ const MESES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','
 const MESES_L=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const PERFILES={plana:Array(12).fill(1),verano:[0.7,0.7,0.8,0.9,1.1,1.3,1.5,1.4,1.1,0.9,0.8,0.8],final:[0.8,0.7,0.8,0.8,0.9,0.9,0.8,0.7,1.0,1.2,1.6,1.8]};
 // [min,max,step,formato]
-const R={ventas:[0,2e7,1e5,'e'],crec:[-50,100,1,'pctS'],intens:[0,150,10,'pct0'],compras:[0,100,1,'compras'],personal:[0,6e6,5e4,'e'],otros:[0,3e6,25e3,'e'],
- pmc:[0,150,5,'dias'],pme:[0,120,5,'diasV'],pmp:[0,150,5,'dias'],pmc0:[0,150,5,'dias'],pme0:[0,120,5,'diasV'],pmp0:[0,150,5,'dias'],inv:[0,2e6,5e4,'e'],deudaLP:[0,6e6,5e4,'e'],tipoLP:[0,10,.25,'pct2'],plazoLP:[1,20,1,'anos'],
+const R={ventas:[0,2e7,1e5,'e'],crec:[-50,100,1,'pctS'],intens:[0,150,10,'pct0'],compras:[0,100,1,'compras'],personal:[0,6e6,5e4,'e'],otros:[0,3e6,25e3,'e'],irpf:[0,40,.5,'pct1'],ssEmp:[0,40,.5,'pct1'],
+ pmc:[0,150,5,'dias'],pme:[0,120,5,'diasV'],pmp:[0,150,5,'dias'],pmc0:[0,150,5,'dias'],pme0:[0,120,5,'diasV'],pmp0:[0,150,5,'dias'],anc0:[0,2e7,5e4,'e'],inv:[0,2e6,5e4,'e'],deudaLP:[0,6e6,5e4,'e'],tipoLP:[0,10,.25,'pct2'],plazoLP:[1,20,1,'anos'],
  amort:[0,1e6,1e4,'e'],tasaIS:[0,50,1,'pct0'],tes0:[0,2e6,1e4,'e'],minimo:[0,1e6,1e4,'e'],div:[0,1e6,1e4,'e'],
  limite:[0,3e6,5e4,'e'],tipo:[0,12,.25,'pct2'],polAper:[0,1.5,.05,'pct2'],polND:[0,1,.05,'pct2'],
  cpImp:[0,2e6,5e4,'e'],cpTipo:[0,12,.25,'pct2'],cpPlazo:[1,12,1,'meses'],
+ descPct:[0,100,5,'pct0'],descCom:[0,3,.1,'pct1'],descTipo:[0,12,.25,'pct2'],
  facPct:[0,100,5,'pct0'],facCom:[0,3,.1,'pct1'],facTipo:[0,12,.25,'pct2'],
+ titPct:[0,100,5,'pct0'],titTipo:[0,12,.25,'pct2'],titCom:[0,3,.1,'pct1'],titRes:[0,30,1,'pct0'],
+ mpImp:[0,1e7,1e5,'e'],mpPlazo:[1,12,1,'meses'],mpTipo:[0,12,.25,'pct2'],mpCost:[0,5,.1,'pct1'],
+ mbImp:[0,2e7,1e5,'e'],mbPlazo:[2,10,1,'anos'],mbTipo:[0,12,.25,'pct2'],mbCost:[0,5,.1,'pct1'],
  lpImp:[0,3e6,5e4,'e'],lpTipo:[0,10,.25,'pct2'],lpPlazo:[1,15,1,'anos'],lpCom:[0,2,.05,'pct2'],
+ leasPct:[0,100,5,'pct0'],leasTipo:[0,12,.25,'pct2'],leasPlazo:[2,10,1,'anos'],
+ lbImp:[0,5e6,5e4,'e'],lbTipo:[0,12,.25,'pct2'],lbPlazo:[2,20,1,'anos'],
  clImp:[0,1.5e6,25e3,'e'],clTipo:[0,15,.25,'pct2'],clPlazo:[6,60,6,'meses'],clCom:[0,8,.25,'pct2'],
+ rentPct:[5,50,1,'pct0'],apzMeses:[1,6,1,'meses'],apzTipo:[0,10,.0625,'pct2'],
  iniExi:[0,5e6,1e4,'e'],iniCli:[0,1e7,1e4,'e'],iniProv:[0,5e6,1e4,'e'],iniIVA:[0,2e6,5e3,'e'],iniIS:[0,2e6,5e3,'e'],polIni:[0,3e6,1e4,'e'],cfImp:[0,1.5e6,25e3,'e'],cfPre:[0,3e7,25e4,'e'],cfCom:[0,10,.5,'pct1'],
  akImp:[0,3e6,5e4,'e'],akPre:[0,4e7,5e5,'e']};
-const SOURCES=['pol','cp','fac','conf','lp','cl','cf','ak'];
-const INI={ventas:6e6,crec:0,perfil:'verano',intens:100,compras:55,personal:14e5,otros:6e5,pmc:75,pme:45,pmp:60,cambio:false,pmc0:75,pme0:45,pmp0:60,inv:3e5,invMes:2,manual:false,iniExi:0,iniCli:0,iniProv:0,iniIVA:0,iniIS:0,polIni:0,
+const SOURCES=['pol','cp','desc','fac','conf','tit','mp','mb','lp','leas','lb','cl','rent','apz','cf','ak'];
+const INI={ventas:6e6,crec:0,perfil:'verano',intens:100,compras:55,personal:14e5,otros:6e5,nom:false,irpf:15,ssEmp:30,pmc:75,pme:45,pmp:60,cambio:false,pmc0:75,pme0:45,pmp0:60,anc0:25e5,inv:3e5,invMes:2,manual:false,iniExi:0,iniCli:0,iniProv:0,iniIVA:0,iniIS:0,polIni:0,
  deudaLP:15e5,tipoLP:4,plazoLP:6,amort:15e4,tasaIS:25,iva:true,tes0:15e4,minimo:1e5,div:0,divMes:5,
  pol:true,limite:85e4,tipo:5,polAper:0,polND:0,
  cp:false,cpImp:3e5,cpMes:5,cpTipo:5.5,cpPlazo:6,cpModo:'bullet',
+ desc:false,descPct:30,descCom:.5,descTipo:5,descMes:0,
  fac:false,facPct:30,facCom:1,facTipo:5,facMes:0,conf:false,
+ tit:false,titPct:30,titTipo:4.5,titCom:1,titRes:10,titMes:0,
+ mp:false,mpImp:1e6,mpMes:4,mpPlazo:6,mpTipo:4.5,mpCost:1,
+ mb:false,mbImp:2e6,mbMes:3,mbPlazo:5,mbTipo:5.5,mbCost:2,
  lp:false,lpImp:5e5,lpMes:2,lpTipo:4.5,lpPlazo:5,lpCom:.5,
+ leas:false,leasPct:100,leasTipo:5,leasPlazo:5,
+ lb:false,lbImp:5e5,lbMes:4,lbTipo:5.5,lbPlazo:8,
  cl:false,clImp:2e5,clMes:4,clTipo:8,clPlazo:36,clCom:3,
+ rent:false,rentPct:22,apz:false,apzMeses:6,apzTipo:4.0625,
  cf:false,cfImp:25e4,cfMes:5,cfPre:6e6,cfCom:6,
  ak:false,akImp:5e5,akMes:4,akPre:8e6,akMot:'oportunidad'};
-const BLANK={...INI,ventas:0,crec:0,perfil:'plana',compras:0,personal:0,otros:0,pmc:0,pme:0,pmp:0,pmc0:0,pme0:0,pmp0:0,inv:0,invMes:0,deudaLP:0,amort:0,tes0:0,minimo:0,div:0,
- limite:0,cpImp:0,lpImp:0,clImp:0,cfImp:0,cfPre:0,akImp:0,akPre:0,facPct:0};
+const BLANK={...INI,ventas:0,crec:0,perfil:'plana',compras:0,personal:0,otros:0,pmc:0,pme:0,pmp:0,pmc0:0,pme0:0,pmp0:0,anc0:0,inv:0,invMes:0,deudaLP:0,amort:0,tes0:0,minimo:0,div:0,
+ limite:0,cpImp:0,lpImp:0,clImp:0,cfImp:0,cfPre:0,akImp:0,akPre:0,facPct:0,descPct:0,titPct:0,mpImp:0,mbImp:0,lbImp:0};
 let REF=BLANK;
 const ids=Object.keys(INI), f=document.getElementById('f');
 const UNIT={e:'€',pctS:'%',pct0:'%',pct1:'%',pct2:'%',compras:'% ventas',dias:'días',diasV:'días',anos:'años',meses:'meses'};
@@ -457,7 +504,7 @@ Object.entries(R).forEach(([k,[mn,mx,st,ft]])=>{const el=document.getElementById
   tx.addEventListener('change',commit); tx.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault(); commit(); tx.blur();}});
   el.addEventListener('input',()=>{delete el.dataset.exact;});
 });
-['invMes','divMes','cpMes','facMes','lpMes','clMes','cfMes','akMes'].forEach(id=>document.getElementById(id).innerHTML=MESES_L.map((m,i)=>`<option value="${i}">${m[0].toUpperCase()+m.slice(1)}</option>`).join(''));
+['invMes','divMes','cpMes','facMes','lpMes','clMes','cfMes','akMes','descMes','titMes','mpMes','mbMes','lbMes'].forEach(id=>document.getElementById(id).innerHTML=MESES_L.map((m,i)=>`<option value="${i}">${m[0].toUpperCase()+m.slice(1)}</option>`).join(''));
 
 function fmt(n,d=0){const neg=n<0; let [i,fr]=Math.abs(n).toFixed(d).split('.'); i=i.replace(/\B(?=(\d{3})+(?!\d))/g,'.'); const zero=+i.replace(/\./g,'')===0&&!(fr&&+fr>0); return (neg&&!zero?'−':'')+i+(fr?','+fr:'');}
 const eur=n=>fmt(n)+' €', sgnEur=n=>(Math.round(n)>0?'+':'')+eur(n), pct=(n,d=1)=>fmt(n,d)+' %';
@@ -475,87 +522,131 @@ function calc(s){
   const prof=PERFILES[s.perfil], k=s.intens/100, g=s.crec/100, c=s.compras/100, t=s.tasaIS/100, ivaR=s.iva?0.21:0;
   const w=j=>1+k*(prof[((j%12)+12)%12]-1);
   let norm=0; for(let i=0;i<12;i++) norm+=w(i)*Math.pow(1+g,i/12);
-  const base=s.ventas/norm, sales=i=>base*w(i)*Math.pow(1+g,i/12), cogs=i=>sales(i)*c;
+  const base=norm>0?s.ventas/norm:0, sales=i=>base*w(i)*Math.pow(1+g,i/12), cogs=i=>sales(i)*c;
   const tail=(fn,e,d)=>{let rem=d/30,i=e,sum=0;while(rem>1e-9){const p=Math.min(1,rem);sum+=fn(i)*p;rem-=p;i--;}return sum;};
   const head=(fn,st,d)=>{let rem=d/30,i=st,sum=0;while(rem>1e-9){const p=Math.min(1,rem);sum+=fn(i)*p;rem-=p;i++;}return sum;};
   const P0=s.cambio?{c:s.pmc0,e:s.pme0,p:s.pmp0}:{c:s.pmc,e:s.pme,p:s.pmp};
   const dC=i=>i<0?P0.c:s.pmc, dE=i=>i<0?P0.e:s.pme, dP=i=>i<0?P0.p:s.pmp;
-  const man=!!s.manual, ivaR0=s.iva?0.21:0;
+  const man=!!s.manual;
   const existM=i=>head(cogs,i+1,dE(i));
   const exist=i=>(man&&i===-1)?s.iniExi:existM(i), compras=i=>cogs(i)+exist(i)-exist(i-1);
-  const facOn=s.fac&&s.facPct>0, salesF=i=>(facOn&&i>=s.facMes&&i<=11)?sales(i)*s.facPct/100:0, salesN=i=>sales(i)-salesF(i);
-  const cliN=i=>(man&&i===-1)?s.iniCli/(1+ivaR0):tail(salesN,i,dC(i)), cliSin=i=>(man&&i===-1)?s.iniCli/(1+ivaR0):tail(sales,i,dC(i)), prov=i=>(man&&i===-1)?s.iniProv/(1+ivaR0):tail(compras,i,dP(i));
-  const nof=i=>cliN(i)+exist(i)-prov(i);
-  let ventasAno=0,consumo=0; for(let m=0;m<12;m++){ventasAno+=sales(m);consumo+=cogs(m);}
-  const ebitda=ventasAno-consumo-s.personal-s.otros;
-  // deuda existente
+  // cesión de facturas: factoring (sin recurso), descuento (con recurso), titulización (fondo)
+  const pF=s.fac?s.facPct:0, pD=s.desc?s.descPct:0, pT=s.tit?s.titPct:0, pS=pF+pD+pT, kS=pS>100?100/pS:1;
+  const stream=(on,pct,mes)=>i=>(on&&pct>0&&i>=mes&&i<=11)?sales(i)*pct*kS/100:0;
+  const salesF=stream(s.fac,pF,s.facMes), salesD=stream(s.desc,pD,s.descMes), salesT=stream(s.tit,pT,s.titMes);
+  const salesN=i=>sales(i)-salesF(i)-salesD(i)-salesT(i);
+  const cliN=i=>(man&&i===-1)?s.iniCli/(1+ivaR):tail(salesN,i,dC(i)), cliSin=i=>(man&&i===-1)?s.iniCli/(1+ivaR):tail(sales,i,dC(i)), prov=i=>(man&&i===-1)?s.iniProv/(1+ivaR):tail(compras,i,dP(i));
+  const tD=i=>tail(salesD,i,dC(i)), tT=i=>tail(salesT,i,dC(i)), res=s.tit?s.titRes/100:0;
+  const nof=i=>cliN(i)+tD(i)+res*tT(i)+exist(i)-prov(i);
+  // renting en lugar de comprar
+  const rentOn=!!s.rent&&s.inv>0, invEff=rentOn?0:s.inv, rentM=m=>(rentOn&&m>=s.invMes)?s.inv*s.rentPct/100/12:0;
+  let ventasAno=0,consumo=0,rentAno=0; for(let m=0;m<12;m++){ventasAno+=sales(m);consumo+=cogs(m);rentAno+=rentM(m);}
+  const ebitda=ventasAno-consumo-s.personal-s.otros-rentAno;
+  // deuda que ya existía
   const rLP=s.tipoLP/100/12,nLP=s.plazoLP*12, cuotaLP=s.deudaLP<=0?0:(rLP===0?s.deudaLP/nLP:s.deudaLP*rLP/(1-Math.pow(1+rLP,-nLP)));
   const lp0=[]; let bal=s.deudaLP; for(let m=0;m<12;m++){const i=bal*rLP,pr=Math.min(bal,cuotaLP-i); lp0.push({i,p:pr,bal:bal-pr}); bal-=pr;}
-  // fuentes con calendario
-  const L=s.lp?loan(s.lpImp,s.lpMes,s.lpTipo,s.lpPlazo*12,'cuotas'):loan(0), C=s.cp?loan(s.cpImp,s.cpMes,s.cpTipo,s.cpPlazo,s.cpModo):loan(0), CL=s.cl?loan(s.clImp,s.clMes,s.clTipo,s.clPlazo,'cuotas'):loan(0);
-  const lpComM=m=>(s.lp&&m===s.lpMes)?s.lpImp*s.lpCom/100:0, clComM=m=>(s.cl&&m===s.clMes)?s.clImp*s.clCom/100:0;
-  const facCostM=m=>salesF(m)*(1+ivaR)*(s.facCom/100+s.facTipo/100*s.pmc/360);
-  let intProg=0; for(let m=0;m<12;m++) intProg+=lp0[m].i+L[m].i+C[m].i+CL[m].i+lpComM(m)+clComM(m)+facCostM(m);
+  // instrumentos de deuda con calendario
+  const Z=loan(0);
+  const D={lp:s.lp?loan(s.lpImp,s.lpMes,s.lpTipo,s.lpPlazo*12,'cuotas'):Z, cp:s.cp?loan(s.cpImp,s.cpMes,s.cpTipo,s.cpPlazo,s.cpModo):Z, cl:s.cl?loan(s.clImp,s.clMes,s.clTipo,s.clPlazo,'cuotas'):Z,
+    mp:s.mp?loan(s.mpImp,s.mpMes,s.mpTipo,s.mpPlazo,'bullet'):Z, mb:s.mb?loan(s.mbImp,s.mbMes,s.mbTipo,s.mbPlazo*12,'bullet'):Z,
+    leas:(s.leas&&!rentOn&&s.inv>0)?loan(s.inv*s.leasPct/100,s.invMes,s.leasTipo,s.leasPlazo*12,'cuotas'):Z, lb:s.lb?loan(s.lbImp,s.lbMes,s.lbTipo,s.lbPlazo*12,'cuotas'):Z};
+  const DK=Object.keys(D);
+  const FEES={lp:()=>s.lp?[s.lpMes,s.lpImp*s.lpCom/100]:null, cl:()=>s.cl?[s.clMes,s.clImp*s.clCom/100]:null, mp:()=>s.mp?[s.mpMes,s.mpImp*s.mpCost/100]:null, mb:()=>s.mb?[s.mbMes,s.mbImp*s.mbCost/100]:null};
+  const feeOf=(key,m)=>{const f=FEES[key]&&FEES[key](); return f&&f[0]===m?f[1]:0;};
+  const feeM=m=>Object.keys(FEES).reduce((a,key)=>a+feeOf(key,m),0);
+  const facCostM=m=>salesF(m)*(1+ivaR)*(s.facCom/100+s.facTipo/100*dC(m)/360);
+  const descCostM=m=>salesD(m)*(1+ivaR)*(s.descCom/100+s.descTipo/100*dC(m)/360);
+  const titCostM=m=>salesT(m)*(1+ivaR)*(s.titCom/100+s.titTipo/100*dC(m)/360);
+  let intProg=0; for(let m=0;m<12;m++) intProg+=lp0[m].i+DK.reduce((a,key)=>a+D[key][m].i,0)+feeM(m)+facCostM(m)+descCostM(m)+titCostM(m);
   const baii=ebitda-s.amort, bai=baii-intProg, isBAII=t*Math.max(baii,0), isCash=t*Math.max(bai,0), escudo=isBAII-isCash;
   // IVA
-  const rep=i=>sales(i)*ivaR, sop=i=>compras(i)*ivaR+(i===s.invMes?s.inv*ivaR:0);
+  const rep=i=>sales(i)*ivaR, sop=i=>compras(i)*ivaR+(i===s.invMes?invEff*ivaR:0);
   const ivaMensual=s.ventas>6010121.04, per=ivaMensual?1:3;
   let ivaIni=0; for(let i=-per;i<0;i++) ivaIni+=rep(i)-sop(i); ivaIni=Math.max(0,ivaIni); if(man) ivaIni=s.iva?s.iniIVA:0;
   let carry=0; const liq=m=>{if(m%per!==0) return 0; if(m===0&&man){carry=0; return ivaIni;} let x=carry; for(let i=m-per;i<m;i++) x+=rep(i)-sop(i); if(x>0){carry=0;return x;} carry=x; return 0;};
+  // nóminas: retenciones de IRPF y Seguridad Social
+  const nomOn=!!s.nom, ssT=0.0635, B=s.personal/(1+(nomOn?s.ssEmp/100:0));
+  const payM=i=>{const mm=((i%12)+12)%12; return B/14*((mm===5||mm===11)?2:1);}, retM=i=>payM(i)*s.irpf/100, ssMes=(s.ssEmp/100+ssT)*B/12;
+  const irpfLiq=m=>{if(m%per!==0) return 0; let x=0; for(let i=m-per;i<m;i++) x+=retM(i); return x;};
+  let irpf0=0,irpf1=0; for(let i=-per;i<0;i++) irpf0+=retM(i); for(let i=12-per;i<12;i++) irpf1+=retM(i);
+  const nomPend0=nomOn?irpf0+ssMes:0, nomPend1=nomOn?irpf1+ssMes:0;
+  const persCash=m=>nomOn?(payM(m)-retM(m)-ssT*B/12)+ssMes+irpfLiq(m):s.personal/14*((m===5||m===11)?2:1);
+  // impuesto del año anterior y aplazamiento
+  const isPrev=man?s.iniIS:isCash;
+  const A=(s.apz&&isPrev>0)?loan(isPrev,6,s.apzTipo,s.apzMeses,'bullet'):Z;
   const pol=s.pol, lim=pol?s.limite:0;
-  const isPrev=man?s.iniIS:isCash; const rows=[]; let sinPol=s.tes0, saldo=s.tes0, disp=man?s.polIni:0, intPol=0, comPol=0, deficit=0, deficitMes=-1, usoMax=0, ivaEf=0, facAnt=0, facCost=0;
+  const rows=[]; let sinPol=s.tes0, saldo=s.tes0, disp=man?s.polIni:0, intPol=0, comPol=0, deficit=0, deficitMes=-1, usoMax=0, ivaEf=0, nomEf=0, antAno=0, facCost=0, descCost=0, titCost=0, descAno=0, titAno=0, facAno=0;
   for(let m=0;m<12;m++){
     const v=sales(m);
-    const cobEx=cliN(m-1)+salesN(m)-cliN(m)+salesF(m), pagEx=prov(m-1)+compras(m)-prov(m);
-    const cobros=cobEx*(1+ivaR), pagosProv=pagEx*(1+ivaR), anticipo=salesF(m)*(1+ivaR);
-    const personal=s.personal/14*((m===5||m===11)?2:1), otros=s.otros/12;
-    const invEx=m===s.invMes?s.inv:0, invP=invEx*(1+ivaR), liqIVA=liq(m);
+    const cN=cliN(m-1)+salesN(m)-cliN(m), cD=tD(m-1)+salesD(m)-tD(m), cT=tT(m-1)+salesT(m)-tT(m);
+    const cobEx=cN+salesF(m)+cD+(1-res)*salesT(m)+res*cT, pagEx=prov(m-1)+compras(m)-prov(m);
+    const cobros=cobEx*(1+ivaR), pagosProv=pagEx*(1+ivaR), anticipo=(salesF(m)+(1-res)*salesT(m))*(1+ivaR);
+    const descFin=(salesD(m)-cD)*(1+ivaR);
+    const personal=persCash(m), otros=s.otros/12, renta=rentM(m);
+    const invEx=m===s.invMes?invEff:0, invP=invEx*(1+ivaR), liqIVA=liq(m);
     const isPago=m===6?isPrev+escudo:0, escM=m===6?escudo:0;
-    const fco=cobros-pagosProv-personal-otros-liqIVA-isPago-invP;
+    const fco=cobros-pagosProv-personal-otros-renta-liqIVA-isPago-invP;
     ivaEf+=cobEx*ivaR-pagEx*ivaR-invEx*ivaR-liqIVA;
-    const fc=facCostM(m); facAnt+=anticipo; facCost+=fc;
-    const lpF=L[m].in-lpComM(m)-L[m].i-L[m].p, cpF=C[m].in-C[m].i-C[m].p, clF=CL[m].in-clComM(m)-CL[m].i-CL[m].p;
-    const deudaSin=-lp0[m].i-lp0[m].p+lpF+cpF+clF-fc+escM;
+    nomEf+=(nomOn?s.personal/14*((m===5||m===11)?2:1):personal)-personal;
+    const fc=facCostM(m), dc=descCostM(m), tc=titCostM(m); facCost+=fc; descCost+=dc; titCost+=tc; antAno+=anticipo; facAno+=salesF(m)*(1+ivaR); descAno+=salesD(m)*(1+ivaR); titAno+=salesT(m)*(1+ivaR);
+    const dIn=DK.reduce((a,key)=>a+D[key][m].in,0), dI=DK.reduce((a,key)=>a+D[key][m].i,0), dP=DK.reduce((a,key)=>a+D[key][m].p,0), fees=feeM(m);
+    const deudaSin=-lp0[m].i-lp0[m].p+dIn-dI-dP-fees+descFin-fc-dc-tc+A[m].in-A[m].i-A[m].p+escM;
     const divM=m===s.divMes?s.div:0, cfM=(s.cf&&m===s.cfMes)?s.cfImp*(1-s.cfCom/100):0, akM=(s.ak&&m===s.akMes)?s.akImp:0;
     const flujoSin=fco+deudaSin-divM+cfM+akM; sinPol+=flujoSin;
-    const interes=disp*s.tipo/100/12, com=(pol&&m===0?s.limite*s.polAper/100:0)+(pol?(lim-disp)*s.polND/100/12:0);
+    const interes=disp*s.tipo/100/12, com=(pol&&m===0?s.limite*s.polAper/100:0)+(pol?Math.max(0,lim-disp)*s.polND/100/12:0);
     const pre=saldo+flujoSin-interes-com; let dDisp=0;
     if(pre<s.minimo) dDisp=Math.max(0,Math.min(lim-disp,s.minimo-pre)); else if(disp>0) dDisp=-Math.min(disp,pre-s.minimo);
     dDisp=Math.max(dDisp,-disp); disp+=dDisp; saldo=pre+dDisp; intPol+=interes; comPol+=com; usoMax=Math.max(usoMax,disp);
     const falta=Math.max(0,s.minimo-saldo); if(falta>deficit){deficit=falta;deficitMes=m;}
     const fca=fco+deudaSin-interes-com+dDisp;
-    rows.push({m,v,cobros,anticipo,pagosProv,personal,otros,liqIVA,isPago,invP,fco,lpI:lp0[m].i,lpP:lp0[m].p,
-      lpIn:L[m].in,lpOut:lpComM(m)+L[m].i+L[m].p,cpIn:C[m].in,cpOut:C[m].i+C[m].p,clIn:CL[m].in,clOut:clComM(m)+CL[m].i+CL[m].p,
-      fc,escM,pol:interes+com,dDisp,fca,divM,cfM,akM,vt:fca-divM+cfM+akM,saldo,sinPol,disp,nof:nof(m)});
+    const by=key=>({in:D[key][m].in,out:D[key][m].i+D[key][m].p+feeOf(key,m)});
+    rows.push({m,v,cobros,anticipo,pagosProv,personal,otros,renta,liqIVA,isPago,invP,fco,lpI:lp0[m].i,lpP:lp0[m].p,
+      lp:by('lp'),cp:by('cp'),cl:by('cl'),mp:by('mp'),mb:by('mb'),leas:by('leas'),lb:by('lb'),apzIn:A[m].in,apzOut:A[m].i+A[m].p,descFin,
+      fc,dc,tc,escM,pol:interes+com,dDisp,fca,divM,cfM,akM,vt:fca-divM+cfM+akM,saldo,sinPol,disp,nof:nof(m)});
   }
   let ivaFin=carry; for(let i=12-per;i<12;i++) ivaFin+=rep(i)-sop(i); ivaFin=Math.max(0,ivaFin);
   const nofs=rows.map(r=>r.nof), nof0=nof(-1), nofMin=Math.min(nof0,...nofs), nofMax=Math.max(nof0,...nofs);
   let necMax=0,necMes=-1, minSin=Infinity, minSinMes=0; rows.forEach(r=>{const n=s.minimo-r.sinPol; if(n>necMax){necMax=n;necMes=r.m;} if(r.sinPol<minSin){minSin=r.sinPol;minSinMes=r.m;}});
-  const sum=f=>rows.reduce((a,x)=>a+f(x),0);
+  const sum=f=>rows.reduce((a,x)=>a+f(x),0), sumD=(key,f)=>D[key].reduce((a,x)=>a+f(x),0);
   const fcoAno=sum(x=>x.fco), fcaAno=sum(x=>x.fca);
-  const lpNewI=sum(x=>0)+L.reduce((a,x)=>a+x.i,0), cpI=C.reduce((a,x)=>a+x.i,0), clI=CL.reduce((a,x)=>a+x.i,0), lp0I=lp0.reduce((a,x)=>a+x.i,0);
-  const servicio=sum(x=>x.lpI+x.lpP)+L.reduce((a,x)=>a+x.i+x.p,0)+C.reduce((a,x)=>a+x.i+x.p,0)+CL.reduce((a,x)=>a+x.i+x.p,0)+intPol;
-  const deudaFin=lp0[11].bal+L[11].bal+C[11].bal+CL[11].bal+rows[11].disp;
-  const costeTot=lp0I+lpNewI+(s.lp?s.lpImp*s.lpCom/100:0)+cpI+clI+(s.cl?s.clImp*s.clCom/100:0)+facCost+intPol+comPol+(s.cf?s.cfImp*s.cfCom/100:0);
-  return {rows,ventasAno,consumo,ebitda,margen:ventasAno?ebitda/ventasAno*100:0,nof0,dNof:rows[11].nof-nof0,nofMin,nofMax,necMax,necMes,minSin,minSinMes,
-    intPol,comPol,deficit,deficitMes,usoMax,ciclo:s.pmc+s.pme-s.pmp,tesFinal:rows[11].saldo,dispFinal:rows[11].disp,fcoAno,fcaAno,cuotaLP,lp0,L,C,CL,
-    lp0I,lpNewI,cpI,clI,facAnt,facCost,ivaMensual,baii,bai,isBAII,isCash,escudo,intProg,ivaEf,ivaIni,ivaFin,servicio,deudaFin,costeTot,
-    rcsd:servicio>0?fcoAno/servicio:null, rcsdt:servicio>0?(s.tes0+fcoAno)/servicio:null, dEb:ebitda>0?(deudaFin-rows[11].saldo)/ebitda:null,
-    bal:{exi0:exist(-1),exi1:exist(11),cli0:cliSin(-1)*(1+ivaR),cli1:cliN(11)*(1+ivaR),cli1sin:cliSin(11)*(1+ivaR),prov0:prov(-1)*(1+ivaR),prov1:prov(11)*(1+ivaR),
-      hac0:ivaIni+isPrev,hac1:ivaFin+isCash,pol0:man?s.polIni:0}, isPrev, taxDiff:isCash-isPrev};
+  const lp0I=lp0.reduce((a,x)=>a+x.i,0), intDebt=lp0I+DK.reduce((a,key)=>a+sumD(key,x=>x.i),0), feesAno=sum(x=>0)+[...Array(12).keys()].reduce((a,m)=>a+feeM(m),0);
+  const princAno=lp0.reduce((a,x)=>a+x.p,0)+DK.reduce((a,key)=>a+sumD(key,x=>x.p),0), inAno=DK.reduce((a,key)=>a+sumD(key,x=>x.in),0);
+  const apzI=A.reduce((a,x)=>a+x.i,0), apzNet=A.reduce((a,x)=>a+x.in-x.p,0), descNet=sum(x=>x.descFin);
+  const servicio=lp0.reduce((a,x)=>a+x.i+x.p,0)+DK.reduce((a,key)=>a+sumD(key,x=>x.i+x.p),0)+intPol;
+  const descDebt0=0, descDebt1=tD(11)*(1+ivaR), pol0=man?s.polIni:0;
+  const debt0=s.deudaLP+pol0, debt1=lp0[11].bal+DK.reduce((a,key)=>a+D[key][11].bal,0)+descDebt1+rows[11].disp;
+  const finCosts=intDebt+feesAno+facCost+descCost+titCost+apzI+intPol+comPol;
+  const costeTot=finCosts+(s.cf?s.cfImp*s.cfCom/100:0);
+  // balance y rentabilidad
+  const exi0=exist(-1), exi1=exist(11), cli0=cliSin(-1)*(1+ivaR), cli1=cliN(11)*(1+ivaR), des1=descDebt1, resT1=res*tT(11)*(1+ivaR), prov0=prov(-1)*(1+ivaR), prov1=prov(11)*(1+ivaR);
+  const hac0=ivaIni+isPrev+nomPend0, isDev=t*Math.max(baii-finCosts,0), hac1=ivaFin+isDev+nomPend1+A[11].bal;
+  const anc0=s.anc0, anc1=s.anc0+invEff-s.amort;
+  const act0=anc0+exi0+cli0+s.tes0, act1=anc1+exi1+cli1+des1+resT1+rows[11].saldo;
+  const pas0=prov0+hac0+debt0, pas1=prov1+hac1+debt1;
+  const pn0=act0-pas0, bn=ebitda-s.amort-finCosts-isDev, capNet=(s.cf?s.cfImp*(1-s.cfCom/100):0)+(s.ak?s.akImp:0), pn1=pn0+bn-s.div+capNet;
+  const actM=(act0+act1)/2, pnM=(pn0+pn1)/2, debtM=(debt0+debt1)/2;
+  const roa=actM>0?baii/actM*100:null, roe=pnM>0?bn/pnM*100:null, iDebt=debtM>0?(intDebt+feesAno+descCost+intPol+comPol)/debtM*100:null, dpn=pn1>0?debt1/pn1:null, tEf=bai>0?isCash/bai*100:0;
+  return {rows,ventasAno,consumo,rentAno,ebitda,margen:ventasAno?ebitda/ventasAno*100:0,nof0,dNof:rows[11].nof-nof0,nofMin,nofMax,necMax,necMes,minSin,minSinMes,
+    intPol,comPol,deficit,deficitMes,usoMax,ciclo:s.pmc+s.pme-s.pmp,tesFinal:rows[11].saldo,dispFinal:rows[11].disp,fcoAno,fcaAno,cuotaLP,lp0,D,A,
+    lp0I,intDebt,feesAno,princAno,inAno,apzI,apzNet,descNet,facCost,descCost,titCost,antAno,facAno,descAno,titAno,ivaMensual,baii,bai,isBAII,isCash,escudo,intProg,ivaEf,nomEf,ivaIni,ivaFin,servicio,deudaFin:debt1,costeTot,finCosts,
+    rcsd:servicio>0?fcoAno/servicio:null, rcsdt:servicio>0?(s.tes0+fcoAno)/servicio:null, dEb:ebitda>0?(debt1-rows[11].saldo)/ebitda:null, invEff, rentOn, kS,
+    bal:{exi0,exi1,cli0,cli1,cli1sin:cliSin(11)*(1+ivaR),des1,resT1,prov0,prov1,hac0,hac1,pol0,anc0,anc1,act0,act1,pas0,pas1,pn0,pn1,debt0,debt1,nomPend0,nomPend1,apz1:A[11].bal,check:act1-pas1-pn1},
+    isPrev,taxDiff:isCash-isPrev,isDev,bn,roa,roe,iDebt,dpn,tEf,capNet};
 }
-const off=s=>({...s,cp:false,fac:false,conf:false,lp:false,cl:false,cf:false,ak:false,pol:false});
-const anyNew=s=>['cp','fac','lp','cl','cf','ak'].some(k=>s[k]);
+const NEWS=['cp','desc','fac','tit','mp','mb','lp','leas','lb','cl','rent','apz','cf','ak'];
+const off=s=>{const o={...s,pol:false,conf:false}; NEWS.forEach(k=>o[k]=false); return o;};
+const anyNew=s=>NEWS.some(k=>s[k]);
 
-function outputs(s){ document.getElementById('p_prev').disabled=!s.cambio; document.getElementById('p_ini').disabled=!s.manual; Object.entries(R).forEach(([k,v])=>{const t=document.getElementById(k+'_n'); if(t&&document.activeElement!==t) t.value=fmt(s[k],DEC[v[3]]||(Number.isInteger(s[k])?0:2));});
+function outputs(s){ document.getElementById('p_prev').disabled=!s.cambio; document.getElementById('p_ini').disabled=!s.manual; document.getElementById('p_nom').disabled=!s.nom; Object.entries(R).forEach(([k,v])=>{const t=document.getElementById(k+'_n'); if(t&&document.activeElement!==t) t.value=fmt(s[k],DEC[v[3]]||(Number.isInteger(s[k])?0:2));});
   SOURCES.forEach(k=>{const on=s[k]; document.getElementById('d_'+k).classList.toggle('on',on); document.getElementById('b_'+k).textContent=on?'Activada':'Desactivada'; const p=document.getElementById('p_'+k); if(p) p.disabled=!on;});}
 
 function update(){
   const s=read(); outputs(s);
   const r=calc(s), rb=calc(off(s));
-  document.getElementById('ebitdaCalc').innerHTML=`<tr><td>Ventas del año</td><td>${eur(r.ventasAno)}</td></tr><tr><td>− Consumo de materiales (${pct(s.compras,0)})</td><td>${eur(-r.consumo)}</td></tr><tr><td>− Gastos de personal</td><td>${eur(-s.personal)}</td></tr><tr><td>− Otros gastos fijos</td><td>${eur(-s.otros)}</td></tr><tr class="t"><td>= EBITDA</td><td>${eur(r.ebitda)}</td></tr><tr><td>Margen EBITDA = EBITDA / ventas</td><td>${pct(r.margen)}</td></tr><tr><td>− Amortización</td><td>${eur(-s.amort)}</td></tr><tr class="t"><td>= BAII</td><td>${eur(r.baii)}</td></tr><tr><td>− Intereses y costes financieros previstos</td><td>${eur(-r.intProg)}</td></tr><tr class="t"><td>= BAI</td><td>${eur(r.bai)}</td></tr><tr><td>Impuesto (${pct(s.tasaIS,0)}), se paga en julio</td><td>${eur(-r.isCash)}</td></tr>`;
+  document.getElementById('ebitdaCalc').innerHTML=`<tr><td>Ventas del año</td><td>${eur(r.ventasAno)}</td></tr><tr><td>− Consumo de materiales (${pct(s.compras,0)})</td><td>${eur(-r.consumo)}</td></tr><tr><td>− Gastos de personal</td><td>${eur(-s.personal)}</td></tr><tr><td>− Otros gastos fijos</td><td>${eur(-s.otros)}</td></tr>${r.rentAno>0?`<tr><td>− Cuotas de renting</td><td>${eur(-r.rentAno)}</td></tr>`:''}<tr class="t"><td>= EBITDA</td><td>${eur(r.ebitda)}</td></tr><tr><td>Margen EBITDA = EBITDA / ventas</td><td>${pct(r.margen)}</td></tr><tr><td>− Amortización</td><td>${eur(-s.amort)}</td></tr><tr class="t"><td>= BAII</td><td>${eur(r.baii)}</td></tr><tr><td>− Intereses y costes financieros previstos</td><td>${eur(-r.intProg)}</td></tr><tr class="t"><td>= BAI</td><td>${eur(r.bai)}</td></tr><tr><td>Impuesto (${pct(s.tasaIS,0)}), se paga en julio</td><td>${eur(-r.isCash)}</td></tr>`;
   document.getElementById('cuotaTxt').textContent=s.deudaLP>0?`Cuota mensual (sistema francés): ${eur(r.cuotaLP)}. En el año: ${eur(r.lp0I)} de intereses.`:'Sin préstamo a largo previo.';
-  drawMsg(r,rb,s); drawKpis(r,rb,calc(REF),calc(off(REF))); drawCash(r,rb,s); drawSrc(r,s); drawBal(r,s); drawRatios(r); drawFlujos(r); drawBridge(r,s); drawNof(r); drawWhy(r,rb,s); drawGuide(s); drawMonth(r,s);
+  drawMsg(r,rb,s); drawKpis(r,rb,calc(REF),calc(off(REF))); drawCash(r,rb,s); const eff={}; ['pol',...NEWS].forEach(k=>{ if(s[k]){ const q=calc({...s,[k]:false}); eff[k]=[r.roa!==null&&q.roa!==null?r.roa-q.roa:null, r.roe!==null&&q.roe!==null?r.roe-q.roe:null]; }});
+  drawSrc(r,s,eff); drawBal(r,s); drawRatios(r); drawRent(r,calc(REF),s); drawFlujos(r); drawBridge(r,s); drawPyG(r,s); drawNof(r); drawWhy(r,rb,s); drawGuide(s); drawMonth(r,s);
 }
 
 function drawMsg(r,rb,s){let t;
@@ -602,56 +693,130 @@ function drawCash(r,rb,s){
   pts.forEach((p,i)=>{if(p.disp>0.5) g+=`<rect x="${X(i)-16}" y="${YP(p.disp)}" width="32" height="${PB-YP(p.disp)}" fill="${teal}" rx="2"/>`; g+=`<text x="${X(i)}" y="${B+22}" font-size="14" text-anchor="middle" fill="${muted}">${p.lab}</text>`;});
   document.getElementById('cash').innerHTML=g;}
 
-function drawSrc(r,s){
+function drawSrc(r,s,eff){
   const rows=[]; const dil=(imp,pre)=>imp/(pre+imp)*100;
-  if(s.deudaLP>0) rows.push(['Préstamo a largo que ya existía','—',eur(r.lp0I),`${pct(s.tipoLP,2)}, ${FMT.anos(s.plazoLP)} pendientes`,'Pasivo no corriente: baja con cada cuota','Deuda bancaria a largo']);
-  if(s.pol) rows.push(['Póliza de crédito (línea de crédito)',(r.usoMax>0.5?`Hasta ${eur(r.usoMax)}`:'No se usa')+` (límite ${eur(s.limite)})`,eur(r.intPol+r.comPol),`${pct(s.tipo,2)} sobre lo dispuesto${s.polAper||s.polND?' + comisiones':''}`,'Pasivo corriente: póliza dispuesta','Deuda bancaria a corto; solo pagas intereses por lo que usas']);
-  if(s.cp) rows.push(['Préstamo bancario a corto plazo',eur(s.cpImp),eur(r.cpI),`${pct(s.cpTipo,2)}, ${FMT.meses(s.cpPlazo)}, ${s.cpModo==='bullet'?'devolución al vencimiento':'cuotas mensuales'}`,'Pasivo corriente: deuda a corto','Deuda bancaria a corto, importe cerrado']);
-  if(s.fac) rows.push(['Factoring sin recurso',`${eur(r.facAnt)} anticipados`,eur(r.facCost),`${pct(s.facCom,1)} + ${pct(s.facTipo,2)} por ${fmt(s.pmc)} días ≈ ${pct(s.facCom*360/Math.max(s.pmc,1)+s.facTipo,1)} anual equivalente`,`Reduce el saldo de clientes: ${eur(r.bal.cli1)} en lugar de ${eur(r.bal.cli1sin)}`,'Venta de facturas: liquidez a corto sin deuda bancaria']);
-  if(s.conf) rows.push(['Confirming','0 €','0 €','Lo suele pagar el proveedor que anticipa','Ninguno: pagas en la misma fecha','No es financiación para tu empresa; financia a tus proveedores']);
-  if(s.lp) rows.push(['Préstamo bancario a largo plazo',eur(s.lpImp),eur(r.lpNewI+s.lpImp*s.lpCom/100),`${pct(s.lpTipo,2)}, ${FMT.anos(s.lpPlazo)} + ${pct(s.lpCom,2)} de apertura`,'Pasivo no corriente (y corriente por la parte a un año)','Deuda bancaria a largo: adecuada para inversión y NOF permanentes']);
-  if(s.cl) rows.push(['Crowdlending',eur(s.clImp),eur(r.clI+s.clImp*s.clCom/100),`${pct(s.clTipo,2)}, ${FMT.meses(s.clPlazo)} + ${pct(s.clCom,2)} de la plataforma`,'Pasivo financiero (según plazo)','Deuda con inversores particulares vía plataforma; más cara, más ágil y no consume CIRBE']);
-  if(s.cf) rows.push(['Crowdfunding de capital',eur(s.cfImp*(1-s.cfCom/100))+' netos',`${eur(s.cfImp*s.cfCom/100)} + ${pct(dil(s.cfImp,s.cfPre),1)} de la empresa`,`Valoración previa ${eur(s.cfPre)}`,'Patrimonio neto','Capital de muchos pequeños inversores; el coste es la dilución']);
-  if(s.ak) rows.push(['Ampliación de capital',eur(s.akImp),`${pct(dil(s.akImp,s.akPre),1)} de la empresa`,`Valoración previa ${eur(s.akPre)}`,'Patrimonio neto','Capital: sin cuotas ni intereses, pero con pérdida de control', s.akMot==='puntual']);
-  let h='<tr><th>Fuente</th><th>Fondos que aporta</th><th>Coste en el año</th><th>Condiciones</th><th>Efecto en el balance</th><th>Naturaleza</th></tr>';
-  h+= rows.length? rows.map(x=>`<tr class="${x[6]?'warn':''}"><td><b>${x[0]}</b></td><td class="n">${x[1]}</td><td class="n">${x[2]}</td><td>${x[3]}</td><td>${x[4]}</td><td>${x[5]}</td></tr>`).join('') : '<tr><td colspan="6">No hay ninguna fuente activada.</td></tr>';
+  const E=k=>{const e=eff[k]; if(!e) return ['—','—']; const f=v=>v===null?'—':(Math.abs(v)<0.005?'=':(v>0?'+':'−')+fmt(Math.abs(v),2)+' pp'); return [f(e[0]),f(e[1])];};
+  const add=(k,a,b,c,d,e,f,warn)=>{const [x,y]=k?E(k):['—','—']; rows.push([a,b,c,d,e,f,x,y,warn]);};
+  const sd=key=>r.D[key].reduce((a,x)=>a+x.i,0);
+  if(s.deudaLP>0) add(null,'Préstamo a largo que ya existía','—',eur(r.lp0I),`${pct(s.tipoLP,2)}, ${FMT.anos(s.plazoLP)} pendientes`,'Pasivo no corriente','Deuda bancaria a largo');
+  if(s.pol) add('pol','Póliza de crédito (línea de crédito)',(r.usoMax>0.5?`Hasta ${eur(r.usoMax)}`:'No se usa')+` (límite ${eur(s.limite)})`,eur(r.intPol+r.comPol),`${pct(s.tipo,2)} sobre lo dispuesto${s.polAper||s.polND?' + comisiones':''}`,'Pasivo corriente','Deuda bancaria a corto; intereses solo por lo dispuesto');
+  if(s.cp) add('cp','Préstamo bancario a corto plazo',eur(s.cpImp),eur(sd('cp')),`${pct(s.cpTipo,2)}, ${FMT.meses(s.cpPlazo)}, ${s.cpModo==='bullet'?'al vencimiento':'cuotas mensuales'}`,'Pasivo corriente','Deuda bancaria a corto, importe cerrado');
+  if(s.desc) add('desc','Descuento comercial de efectos',`${eur(r.descAno)} anticipados`,eur(r.descCost),`${pct(s.descCom,1)} + ${pct(s.descTipo,2)} por ${fmt(s.pmc)} días`,`Clientes siguen en el balance y aparece una deuda de ${eur(r.bal.des1)}`,'Anticipo con recurso: deuda bancaria a corto');
+  if(s.fac) add('fac','Factoring sin recurso',`${eur(r.facAno)} anticipados`,eur(r.facCost),`${pct(s.facCom,1)} + ${pct(s.facTipo,2)} por ${fmt(s.pmc)} días ≈ ${pct(s.facCom*360/Math.max(s.pmc,1)+s.facTipo,1)} anual`,'Reduce el saldo de clientes','Venta de facturas: liquidez sin deuda');
+  if(s.conf) add('conf','Confirming','0 €','0 €','Lo paga el proveedor que anticipa','Ninguno: pagas en la misma fecha','No es financiación para tu empresa');
+  if(s.tit) add('tit','Titulización de facturas',`${eur(r.titAno*(1-s.titRes/100))} anticipados`,eur(r.titCost),`${pct(s.titTipo,2)} por ${fmt(s.pmc)} días + ${pct(s.titCom,1)}; reserva del ${pct(s.titRes,0)}`,`Reduce clientes; queda una reserva a cobrar de ${eur(r.bal.resT1)}`,'Venta de facturas a un fondo de titulización',r.kS<1);
+  if(s.mp) add('mp','Pagarés en el MARF',eur(s.mpImp),eur(sd('mp')+s.mpImp*s.mpCost/100),`${pct(s.mpTipo,2)}, ${FMT.meses(s.mpPlazo)} + ${pct(s.mpCost,1)} de emisión`,'Pasivo corriente','Deuda en mercado a corto',s.ventas<2e7);
+  if(s.mb) add('mb','Bonos en el MARF',eur(s.mbImp),eur(sd('mb')+s.mbImp*s.mbCost/100),`Cupón ${pct(s.mbTipo,2)}, ${FMT.anos(s.mbPlazo)} + ${pct(s.mbCost,1)} de emisión`,'Pasivo no corriente','Deuda en mercado a largo, devolución al vencimiento',s.ventas<2e7);
+  if(s.lp) add('lp','Préstamo bancario a largo plazo',eur(s.lpImp),eur(sd('lp')+s.lpImp*s.lpCom/100),`${pct(s.lpTipo,2)}, ${FMT.anos(s.lpPlazo)} + ${pct(s.lpCom,2)} de apertura`,'Pasivo no corriente','Deuda bancaria a largo');
+  if(s.leas&&!r.rentOn&&s.inv>0) add('leas','Leasing de la maquinaria',eur(s.inv*s.leasPct/100),eur(sd('leas')),`${pct(s.leasTipo,2)}, ${FMT.anos(s.leasPlazo)}`,'La máquina en el activo y la deuda en el pasivo','Arrendamiento financiero: deuda ligada al activo');
+  if(s.lb) add('lb','Sale and lease back',eur(s.lbImp),eur(sd('lb')),`${pct(s.lbTipo,2)}, ${FMT.anos(s.lbPlazo)}`,'El activo sigue en el balance y aparece una deuda','Financiación con garantía del propio activo');
+  if(s.cl) add('cl','Crowdlending',eur(s.clImp),eur(sd('cl')+s.clImp*s.clCom/100),`${pct(s.clTipo,2)}, ${FMT.meses(s.clPlazo)} + ${pct(s.clCom,2)}`,'Pasivo financiero','Deuda con inversores vía plataforma');
+  if(s.rent&&s.inv>0) add('rent','Renting de la maquinaria',`Evita pagar ${eur(s.inv)}`,eur(r.rentAno)+' de cuotas',`${pct(s.rentPct,0)} anual del valor`,'La máquina no entra en el activo','Gasto operativo: reduce el EBITDA');
+  if(s.apz) add('apz','Aplazamiento del impuesto',eur(r.isPrev),eur(r.apzI),`${FMT.meses(s.apzMeses)} al ${pct(s.apzTipo,4)}`,'Deuda con Hacienda','Financiación a corto con coste de demora');
+  if(s.cf) add('cf','Crowdfunding de capital',eur(s.cfImp*(1-s.cfCom/100))+' netos',`${eur(s.cfImp*s.cfCom/100)} + ${pct(dil(s.cfImp,s.cfPre),1)} de la empresa`,`Valoración previa ${eur(s.cfPre)}`,'Patrimonio neto','Capital; el coste es la dilución');
+  if(s.ak) add('ak','Ampliación de capital',eur(s.akImp),`${pct(dil(s.akImp,s.akPre),1)} de la empresa`,`Valoración previa ${eur(s.akPre)}`,'Patrimonio neto','Capital: sin cuotas, con pérdida de control',s.akMot==='puntual');
+  let h='<tr><th>Fuente</th><th>Fondos que aporta</th><th>Coste en el año</th><th>Condiciones</th><th>Efecto en el balance</th><th>Naturaleza</th><th>Efecto en ROA</th><th>Efecto en ROE</th></tr>';
+  h+=rows.length?rows.map(x=>`<tr class="${x[8]?'warn':''}"><td><b>${x[0]}</b></td><td class="n">${x[1]}</td><td class="n">${x[2]}</td><td>${x[3]}</td><td>${x[4]}</td><td>${x[5]}</td><td class="n">${x[6]}</td><td class="n">${x[7]}</td></tr>`).join(''):'<tr><td colspan="8">No hay ninguna fuente activada.</td></tr>';
   document.getElementById('srcTable').innerHTML=h;}
 
-function drawBal(r,s){const b=r.bal;
-  const lpNew1=r.L[11].bal, cp1=r.C[11].bal, cl1=r.CL[11].bal;
-  const ac0=b.exi0+b.cli0+s.tes0, ac1=b.exi1+b.cli1+r.tesFinal, pc0=b.prov0+b.hac0+b.pol0, pc1=b.prov1+b.hac1+r.dispFinal+cp1;
-  const cap=(s.cf?s.cfImp*(1-s.cfCom/100):0)+(s.ak?s.akImp:0);
-  const rw=(l,a,c,cls='')=>{const d=c-a; return `<tr class="${cls}${Math.abs(d)>0.5&&!cls?' ':''}"><td>${l}</td><td>${eur(a)}</td><td>${eur(c)}</td><td style="color:${Math.abs(d)<0.5?css('--muted'):''}">${Math.abs(d)<0.5?'=':sgnEur(d)}</td></tr>`;};
+function drawBal(r,s){const b=r.bal, D=r.D;
+  const rw=(l,a,c,cls='')=>{const d=c-a; return `<tr class="${cls}"><td>${l}</td><td>${eur(a)}</td><td>${eur(c)}</td><td style="color:${Math.abs(d)<0.5?css('--muted'):''}">${Math.abs(d)<0.5?'=':sgnEur(d)}</td></tr>`;};
+  const g=t=>`<tr class="g"><td colspan="4">${t}</td></tr>`;
+  const bal=k=>D[k][11].bal;
+  const lpNC=s.deudaLP>0||bal('lp')+bal('mb')+bal('leas')+bal('lb')+bal('cl')>0.5;
   let h='<thead><tr><th></th><th>1 de enero</th><th>31 de diciembre</th><th>Variación</th></tr></thead><tbody>';
-  h+='<tr class="g"><td colspan="4">Activo corriente</td></tr>'+rw('Existencias',b.exi0,b.exi1)+rw(s.fac?'Clientes (reducidos por el factoring)':'Clientes',b.cli0,b.cli1,s.fac?'hl':'')+rw('Tesorería',s.tes0,r.tesFinal)+rw('Total activo corriente',ac0,ac1,'t');
-  h+='<tr class="g"><td colspan="4">Pasivo corriente</td></tr>'+rw('Proveedores',b.prov0,b.prov1)+rw('Hacienda (IVA e impuesto pendientes)',b.hac0,b.hac1)+rw('Póliza de crédito (línea de crédito) dispuesta',r.bal.pol0,r.dispFinal)+(s.cp?rw('Préstamo a corto plazo',0,cp1):'')+rw('Total pasivo corriente',pc0,pc1,'t');
-  h+=rw('Fondo de maniobra (AC − PC)',ac0-pc0,ac1-pc1,'t');
-  h+='<tr class="g"><td colspan="4">Financiación a largo y capital</td></tr>'+rw('Préstamo a largo que ya existía',s.deudaLP,r.lp0[11].bal)+(s.lp?rw('Préstamo a largo nuevo',0,lpNew1):'')+(s.cl?rw('Crowdlending',0,cl1):'')+((s.cf||s.ak)?rw('Capital aportado en el año',0,cap,'hl'):'');
+  h+=g('A) Activo no corriente')+rw('Inmovilizado neto',b.anc0,b.anc1);
+  h+=g('B) Activo corriente')+rw('Existencias',b.exi0,b.exi1)+rw((s.fac||s.tit)?'Clientes (reducidos por la cesión de facturas)':'Clientes',b.cli0,b.cli1,(s.fac||s.tit)?'hl':'')+(s.desc?rw('Clientes con efectos descontados',0,b.des1,'hl'):'')+(s.tit?rw('Reserva a cobrar del fondo de titulización',0,b.resT1):'')+rw('Tesorería',s.tes0,r.tesFinal);
+  h+=rw('Total activo',b.act0,b.act1,'t');
+  h+=g('A) Patrimonio neto')+rw('Patrimonio neto',b.pn0,b.pn1,(s.cf||s.ak)?'hl':'');
+  h+=g('B) Pasivo no corriente')+rw('Préstamo a largo que ya existía',s.deudaLP,r.lp0[11].bal)+(s.lp?rw('Préstamo a largo nuevo',0,bal('lp')):'')+(s.mb?rw('Bonos emitidos en el MARF',0,bal('mb')):'')+(bal('leas')>0.5||s.leas?rw('Leasing',0,bal('leas')):'')+(s.lb?rw('Sale and lease back',0,bal('lb')):'')+(s.cl?rw('Crowdlending',0,bal('cl')):'');
+  h+=g('C) Pasivo corriente')+rw('Póliza de crédito (línea de crédito) dispuesta',b.pol0,r.dispFinal)+(s.cp?rw('Préstamo a corto plazo',0,bal('cp')):'')+(s.mp?rw('Pagarés emitidos en el MARF',0,bal('mp')):'')+(s.desc?rw('Deudas por efectos descontados',0,b.des1,'hl'):'')+rw('Proveedores',b.prov0,b.prov1)+rw('Hacienda y Seguridad Social (IVA, impuesto, retenciones)',b.hac0,b.hac1);
+  h+=rw('Total patrimonio neto y pasivo',b.pn0+b.pas0,b.pn1+b.pas1,'t');
+  const ac0=b.exi0+b.cli0+s.tes0, ac1=b.exi1+b.cli1+b.des1+b.resT1+r.tesFinal, pcx=(k)=>0;
+  const pc0=b.prov0+b.hac0+b.pol0, pc1=b.prov1+b.hac1+r.dispFinal+bal('cp')+bal('mp')+b.des1;
+  h+=rw('Fondo de maniobra (activo corriente − pasivo corriente)',ac0-pc0,ac1-pc1,'t');
+  h+=`<tr><td colspan="4" class="hint" style="white-space:normal">Comprobación: activo = patrimonio neto + pasivo ${Math.abs(b.check)<1?'✓':'✗ (diferencia '+eur(b.check)+')'}. El patrimonio neto de partida se calcula como diferencia; el final suma el beneficio neto (${eur(r.bn)}), resta dividendos y suma las aportaciones de capital. La deuda a largo se muestra completa como no corriente.</td></tr>`;
   document.getElementById('balance').innerHTML=h+'</tbody>';}
+
+function drawRent(r,r0,s){
+  const items=[['ROA (rentabilidad económica)',r.roa,r0.roa,'%'],['ROE (rentabilidad financiera)',r.roe,r0.roe,'%'],['Coste medio de la deuda',r.iDebt,r0.iDebt,'%'],['Endeudamiento (deuda / patrimonio neto)',r.dpn,r0.dpn,'x'],['Beneficio neto',r.bn,r0.bn,'€'],['Tipo efectivo del impuesto',r.tEf,r0.tEf,'%']];
+  document.getElementById('rentK').innerHTML=items.map(([n,v,v0,u])=>{const f=x=>x===null?'—':u==='€'?eur(x):u==='x'?fmt(x,2)+'x':pct(x,2); const d=(v===null||v0===null)?0:v-v0; const same=u==='€'?Math.abs(d)<0.5:Math.abs(d)<0.005;
+    const good=n.startsWith('Coste')||n.startsWith('Endeud')||n.startsWith('Tipo')?d<0:d>0;
+    return `<div class="kpi"><div class="n">${n}</div><div class="v">${f(v)}</div><div class="d" style="color:${same?css('--muted'):(good?css('--ok'):css('--out'))}">${same?'Igual que la referencia':(d>0?'▲ ':'▼ ')+(u==='€'?sgnEur(d):(d>0?'+':'−')+fmt(Math.abs(d),2)+(u==='x'?'':' pp'))+' respecto a la referencia'}</div></div>`;}).join('');
+  const w=[]; const add=(x,bad)=>w.push(`<li class="${bad?'bad':''}">${x}</li>`);
+  if(r.roa===null||r.roe===null){ add('Introduce el inmovilizado y los datos de la empresa para calcular las rentabilidades. Si el patrimonio neto es negativo, la ROE no tiene sentido.'); }
+  else{
+    if(r.iDebt!==null){ if(r.roa>r.iDebt) add(`Apalancamiento positivo: la ROA (${pct(r.roa,2)}) supera el coste medio de la deuda (${pct(r.iDebt,2)}). Cada euro de deuda rinde más de lo que cuesta, y la ROE (${pct(r.roe,2)}) queda por encima de la ROA.`); else add(`Apalancamiento negativo: la ROA (${pct(r.roa,2)}) no cubre el coste medio de la deuda (${pct(r.iDebt,2)}). Endeudarse más reduce la ROE.`,true); }
+    add('Fórmula del apalancamiento: ROE ≈ [ROA + (ROA − coste de la deuda) × deuda / patrimonio neto] × (1 − t). La aproximación no es exacta porque el simulador incluye costes de cesión de facturas, comisiones y saldos medios.');
+    if(s.fac||s.tit) add('La cesión de facturas sin recurso reduce el activo (menos clientes): mejora la ROA aunque su coste reduzca el beneficio.');
+    if(s.rent&&s.inv>0) add('El renting saca la máquina del activo, pero su cuota reduce el EBITDA: la ROA puede subir o bajar según la cuota.');
+    if(r.tesFinal>Math.max(3*s.minimo,0.15*r.bal.act1)) add('Si una fuente deja mucha caja ociosa, el activo crece sin generar BAII: la ROA baja. Financiarse por encima de lo necesario también tiene un coste.');
+    if(s.ak||s.cf) add('La ampliación de capital aumenta el patrimonio neto sin generar intereses: la ROE baja aunque la empresa sea más solvente.');
+  }
+  document.getElementById('rentWhy').innerHTML=w.join('');}
+
+function drawPyG(r,s){const row=(l,v,cls='')=>`<tr class="${cls}"><td>${l}</td><td class="${v<-0.5?'neg':''}">${eur(v)}</td></tr>`;
+  const sub=(l,v)=>Math.abs(v)>0.5?row(l,v,'sub'):'';
+  const otros=s.otros+r.rentAno, gf=r.finCosts, baiR=r.baii-gf;
+  let h=row('1. Importe neto de la cifra de negocios',r.ventasAno)+row('4. Aprovisionamientos (consumo de materiales)',-r.consumo)+row('6. Gastos de personal',-s.personal)+row('7. Otros gastos de explotación',-otros)+sub('de los que cuotas de renting',-r.rentAno);
+  h+=row('= EBITDA (resultado bruto de explotación)',r.ebitda,'t e')+row('8. Amortización del inmovilizado',-s.amort)+row('A.1) Resultado de explotación (BAII)',r.baii,'t');
+  h+=row('13. Gastos financieros',-gf)+sub('intereses y comisiones de préstamos, MARF y leasing',-(r.intDebt+r.feesAno))+sub('coste de cesión de facturas (factoring, descuento, titulización)',-(r.facCost+r.descCost+r.titCost))+sub('intereses y comisiones de la póliza',-(r.intPol+r.comPol))+sub('intereses de demora del aplazamiento',-r.apzI);
+  h+=row('A.2) Resultado financiero',-gf,'t')+row('A.3) Resultado antes de impuestos (BAI)',baiR,'t')+row(`17. Impuesto sobre beneficios (${pct(s.tasaIS,0)} × BAI)`,-r.isDev)+row('A.5) Resultado del ejercicio',r.bn,'t e');
+  document.getElementById('pyg').innerHTML=h;
+  const dT=r.tesFinal-s.tes0, conv=r.ebitda>0?r.fcoAno/r.ebitda*100:null;
+  let msg;
+  if(s.ventas<=0&&s.personal<=0&&s.otros<=0) msg='Introduce los datos de la empresa para comparar el beneficio con la caja.';
+  else if(r.bn>0&&r.fcoAno<0) msg=`<b>Gana dinero pero quema caja:</b> el resultado es positivo, pero el FCO es negativo porque las NOF, la inversión y el calendario de impuestos absorben más de lo que genera el EBITDA.`;
+  else if(r.bn<0&&r.fcoAno>0) msg=`<b>Pierde dinero pero genera caja:</b> la amortización y los gastos financieros reducen el beneficio, pero no consumen caja operativa; la caja puede salir de reducir NOF.`;
+  else if(r.bn<0) msg=`<b>Pierde dinero y quema caja:</b> ningún instrumento de financiación a corto plazo arregla esto por sí solo; primero hay que corregir el negocio.`;
+  else msg=`<b>Beneficio y caja no coinciden:</b> la diferencia entre el resultado del ejercicio y el FCO la explican la amortización (gasto que no es pago), la variación de las NOF, la inversión y el desfase de impuestos.`;
+  document.getElementById('pygCmp').innerHTML=`<div><small>Resultado del ejercicio</small><b class="${r.bn<-0.5?'neg':''}">${eur(r.bn)}</b></div><div><small>FCO</small><b class="${r.fcoAno<-0.5?'neg':''}">${eur(r.fcoAno)}</b></div><div><small>Variación de tesorería</small><b class="${dT<-0.5?'neg':''}">${eur(dT)}</b></div><p>${conv!==null?`Conversión de caja (FCO / EBITDA): <b>${pct(conv,0)}</b>. `:''}${msg}</p>`;}
+
+function drawBridge(r,s){const row=(l,v,cls='')=>`<tr class="${cls}"><td>${l}</td><td class="${v<-0.5?'neg':''}">${eur(v)}</td></tr>`;
+  const entradas=r.inAno+r.descNet+r.apzNet+r.dispFinal-r.bal.pol0+r.A.reduce((a,x)=>a+x.p,0);
+  const principal=r.princAno+r.A.reduce((a,x)=>a+x.p,0);
+  let h=row('EBITDA del año',r.ebitda)+row(`− Impuesto sobre BAII (${pct(s.tasaIS,0)} × BAII)`,-r.isBAII);
+  if(Math.abs(r.taxDiff)>0.5) h+=row('± Diferencia entre el impuesto pagado (año anterior) y el devengado',r.taxDiff);
+  h+=row(r.dNof>=0?'− Aumento de NOF':'+ Disminución de NOF',-r.dNof)+row('− Inversión',-r.invEff);
+  if(s.iva) h+=row('± Desfase del IVA',r.ivaEf);
+  if(s.nom) h+=row('± Desfase de retenciones y Seguridad Social',r.nomEf);
+  h+=row('= FCO (flujo de caja operativo)',r.fcoAno,'t');
+  h+=row('− Intereses, comisiones y costes de cesión de facturas × (1 − t)',-(r.intProg-r.escudo))+row('− Devolución de principal',-principal)+row('− Intereses y comisiones de la póliza',-(r.intPol+r.comPol));
+  if(s.apz) h+=row('− Intereses de demora del aplazamiento',-r.apzI);
+  h+=row('+ Entradas de deuda (préstamos, MARF, leasing, descuento, aplazamiento y póliza)',entradas)+row('= FCA (flujo de caja del accionista)',r.fcaAno,'t')+row('− Dividendos',-s.div)+row('+ Aportaciones de capital (netas)',r.capNet)+row('= Variación de tesorería',r.tesFinal-s.tes0,'t')+row('Tesorería a 31 de diciembre',r.tesFinal);
+  document.getElementById('bridge').innerHTML=h;}
+
+function drawMonth(r,s){
+  const L=[['Ventas del mes (sin IVA)',x=>x.v],['Cobros de clientes',x=>x.cobros],...((s.fac||s.tit)?[['   de ellos, anticipados por factoring o titulización',x=>x.anticipo]]:[]),['− Pagos a proveedores',x=>-x.pagosProv],['− Personal'+(s.nom?' (neto, Seguridad Social y retenciones)':''),x=>-x.personal],['− Otros gastos fijos',x=>-x.otros],...(r.rentAno>0?[['− Cuotas de renting',x=>-x.renta]]:[]),...(s.iva?[['− Liquidación de IVA',x=>-x.liqIVA]]:[]),['− Impuesto sobre BAII',x=>-x.isPago],['− Inversión',x=>-x.invP],['= FCO (flujo de caja operativo)',x=>x.fco,'t'],
+   ['− Préstamo que ya existía: intereses',x=>-x.lpI],['− Préstamo que ya existía: principal',x=>-x.lpP]];
+  [['lp','Préstamo a largo nuevo'],['cp','Préstamo a corto'],['mp','Pagarés MARF'],['mb','Bonos MARF'],['leas','Leasing'],['lb','Sale and lease back'],['cl','Crowdlending']].forEach(([k,n])=>{ if(r.D[k].some(x=>x.in||x.i||x.p)) L.push([`+ ${n}: entrada`,x=>x[k].in],[`− ${n}: comisiones, intereses y principal`,x=>-x[k].out]); });
+  if(s.desc) L.push(['+ Descuento comercial: anticipo neto de vencimientos',x=>x.descFin],['− Coste del descuento',x=>-x.dc]);
+  if(s.fac) L.push(['− Coste del factoring',x=>-x.fc]);
+  if(s.tit) L.push(['− Coste de la titulización',x=>-x.tc]);
+  if(s.apz) L.push(['+ Aplazamiento del impuesto',x=>x.apzIn],['− Pago aplazado e intereses de demora',x=>-x.apzOut]);
+  L.push(['+ Ahorro fiscal por intereses',x=>x.escM]);
+  if(s.pol) L.push(['− Póliza: intereses y comisiones',x=>-x.pol],['+ Disposición / − devolución de póliza',x=>x.dDisp]);
+  L.push(['= FCA (flujo de caja del accionista)',x=>x.fca,'t'],['− Dividendos',x=>-x.divM]);
+  if(s.cf) L.push(['+ Crowdfunding de capital (neto)',x=>x.cfM]);
+  if(s.ak) L.push(['+ Ampliación de capital',x=>x.akM]);
+  L.push(['= Variación de tesorería',x=>x.vt,'t'],['Tesorería al final del mes',x=>x.saldo,'t'],['Tesorería sin póliza',x=>x.sinPol]);
+  if(s.pol) L.push(['Póliza (línea de crédito) dispuesta',x=>x.disp]);
+  L.push(['NOF al final del mes',x=>x.nof]);
+  let h='<thead><tr><th>Euros</th>'+MESES.map(m=>`<th>${m}</th>`).join('')+'</tr></thead><tbody>';
+  L.forEach(([l,fn,cls])=>{h+=`<tr class="${cls||''}"><td>${l}</td>`+r.rows.map(x=>{const v=fn(x);return `<td class="${v<-0.5?'neg':''}">${fmt(v)}</td>`;}).join('')+'</tr>';});
+  document.getElementById('month').innerHTML=h+'</tbody>';}
 
 function meter(val,zones,max){const p=v=>Math.max(0,Math.min(100,v/max*100)); let segs='',prev=0; zones.forEach(z=>{segs+=`<span style="width:${p(z.to)-p(prev)}%;background:${z.c}"></span>`;prev=z.to;}); return `<div class="meter-wrap"><div class="meter">${segs}</div>${val===null?'':`<div class="pin" style="left:${p(val)}%"></div>`}</div>`;}
 function drawRatios(r){const red=css('--out'),amb=css('--warn'),grn=css('--ok'); const cov=[{to:1,c:red},{to:1.5,c:amb},{to:3,c:grn}], deb=[{to:2.5,c:grn},{to:3,c:amb},{to:8,c:red}];
   const f2=v=>v===null?'—':(v<0?'−':'')+fmt(Math.abs(v),2);
   const it=(n,v,txt,z,max,tk)=>`<div class="ratio"><div class="name">${n}</div><div class="val">${txt}</div>${meter(v,z,max)}<div class="scale">${tk.map(x=>`<span style="left:${Math.min(x[0]/max*100,100)}%">${x[1]}</span>`).join('')}</div></div>`;
-  document.getElementById('ratios').innerHTML=it('RCSD = FCO / servicio de la deuda',r.rcsd,f2(r.rcsd),cov,3,[[0,'0'],[1,'1'],[1.5,'1,5'],[3,'3+']])+it('RCSD ajustado por tesorería',r.rcsdt,f2(r.rcsdt),cov,3,[[0,'0'],[1,'1'],[1.5,'1,5'],[3,'3+']])+it('Deuda financiera neta / EBITDA',r.dEb,r.dEb===null?'sin EBITDA':f2(r.dEb)+'x',deb,8,[[0,'0'],[2.5,'2,5'],[8,'8+']])+`<p class="hint" style="grid-column:1/-1">Servicio de la deuda del año: ${eur(r.servicio)} (intereses y principal de préstamos y crowdlending, más intereses de la póliza). Deuda financiera al cierre: ${eur(r.deudaFin)}.</p>`;}
+  document.getElementById('ratios').innerHTML=it('RCSD = FCO / servicio de la deuda',r.rcsd,f2(r.rcsd),cov,3,[[0,'0'],[1,'1'],[1.5,'1,5'],[3,'3+']])+it('RCSD ajustado por tesorería',r.rcsdt,f2(r.rcsdt),cov,3,[[0,'0'],[1,'1'],[1.5,'1,5'],[3,'3+']])+it('Deuda financiera neta / EBITDA',r.dEb,r.dEb===null?'sin EBITDA':f2(r.dEb)+'x',deb,8,[[0,'0'],[2.5,'2,5'],[8,'8+']])+`<p class="hint" style="grid-column:1/-1">Servicio de la deuda del año: ${eur(r.servicio)} (intereses y principal de préstamos, MARF, leasing, lease back y crowdlending, más intereses de la póliza). Deuda financiera al cierre: ${eur(r.deudaFin)}.</p>`;}
 
 function drawFlujos(r){const W=1000,H=330,Lx=118,Rx=16,T=16,B=290; const vals=r.rows.flatMap(x=>[x.fco,x.fca]); let mn=Math.min(0,...vals),mx=Math.max(0,...vals); const pad=(mx-mn)*.08||1e4; mn-=pad; mx+=pad;
   const Y=v=>T+(mx-v)/(mx-mn)*(B-T), bw=(W-Lx-Rx)/12, ink=css('--ink'),teal=css('--teal'),muted=css('--muted'),line=css('--line'),out=css('--out'); let g='';
   ticks(mn,mx,5).forEach(v=>{g+=`<line x1="${Lx}" x2="${W-Rx}" y1="${Y(v)}" y2="${Y(v)}" stroke="${line}"/><text x="${Lx-10}" y="${Y(v)+5}" font-size="14" text-anchor="end" fill="${muted}">${eur(v)}</text>`;});
   r.rows.forEach((x,i)=>{const x0=Lx+i*bw+bw*.12,ww=bw*.36; [[x.fco,ink,0],[x.fca,teal,1]].forEach(([v,c,j])=>{const y1=Y(Math.max(v,0)),h=Math.max(1,Math.abs(Y(v)-Y(0))); g+=`<rect x="${x0+j*(ww+2)}" y="${y1}" width="${ww}" height="${h}" fill="${c}" opacity="${v<0?.55:1}" stroke="${v<0?out:'none'}" stroke-width="${v<0?1.5:0}"/>`;}); g+=`<text x="${Lx+i*bw+bw/2}" y="${B+24}" font-size="14" text-anchor="middle" fill="${muted}">${MESES[i]}</text>`;});
   g+=`<line x1="${Lx}" x2="${W-Rx}" y1="${Y(0)}" y2="${Y(0)}" stroke="${ink}" stroke-width="1.3"/>`; document.getElementById('flujos').innerHTML=g;}
-
-function drawBridge(r,s){const row=(l,v,cls='')=>`<tr class="${cls}"><td>${l}</td><td class="${v<-0.5?'neg':''}">${eur(v)}</td></tr>`;
-  const sumR=k=>r.rows.reduce((a,x)=>a+x[k],0);
-  const entradas=sumR('lpIn')+sumR('cpIn')+sumR('clIn')+r.dispFinal-r.bal.pol0;
-  const intereses=r.lp0I+r.lpNewI+r.cpI+r.clI;
-  const princ=r.rows.reduce((a,x)=>a+x.lpP,0)+r.L.reduce((a,x)=>a+x.p,0)+r.C.reduce((a,x)=>a+x.p,0)+r.CL.reduce((a,x)=>a+x.p,0);
-  const comis=(s.lp?s.lpImp*s.lpCom/100:0)+(s.cl?s.clImp*s.clCom/100:0)+r.facCost+r.intPol+r.comPol;
-  let h=row('EBITDA del año',r.ebitda)+row(`− Impuesto sobre BAII (${pct(s.tasaIS,0)} × BAII)`,-r.isBAII)+row(r.dNof>=0?'− Aumento de NOF':'+ Disminución de NOF',-r.dNof)+row('− Inversión',-s.inv);
-  if(Math.abs(r.taxDiff)>0.5) h+=row('± Diferencia entre el impuesto pagado (año anterior) y el devengado',r.taxDiff);
-  if(s.iva) h+=row('± Desfase del IVA',r.ivaEf);
-  h+=row('= FCO (flujo de caja operativo)',r.fcoAno,'t')+row('− Intereses de préstamos × (1 − t)',-(intereses-r.escudo))+row('− Devolución de principal',-princ)+row('− Comisiones, factoring e intereses de la póliza',-comis)+row('+ Entradas netas de deuda (préstamos, crowdlending y póliza)',entradas)+row('= FCA (flujo de caja del accionista)',r.fcaAno,'t')+row('− Dividendos',-s.div)+row('+ Aportaciones de capital (netas)',(s.cf?s.cfImp*(1-s.cfCom/100):0)+(s.ak?s.akImp:0))+row('= Variación de tesorería',r.tesFinal-s.tes0,'t')+row('Tesorería a 31 de diciembre',r.tesFinal);
-  document.getElementById('bridge').innerHTML=h;}
 
 function drawNof(r){const W=560,H=320,Lx=112,Rx=10,T=16,B=270; const vals=r.rows.map(x=>x.nof),mn0=Math.min(0,...vals),mx=Math.max(...vals,1)*1.08; const Y=v=>T+(mx-v)/(mx-mn0)*(B-T),bw=(W-Lx-Rx)/12,ink=css('--ink'),teal=css('--teal'),muted=css('--muted'),line=css('--line'); let g='';
   ticks(mn0,mx,4).forEach(v=>{g+=`<line x1="${Lx}" x2="${W-Rx}" y1="${Y(v)}" y2="${Y(v)}" stroke="${line}"/><text x="${Lx-8}" y="${Y(v)+5}" font-size="14" text-anchor="end" fill="${muted}">${eur(v)}</text>`;});
@@ -661,10 +826,21 @@ function drawNof(r){const W=560,H=320,Lx=112,Rx=10,T=16,B=270; const vals=r.rows
 function drawWhy(r,rb,s){const w=[]; const add=(x,bad)=>w.push(`<li class="${bad?'bad':''}">${x}</li>`);
   add(`Ciclo de caja de <b>${fmt(r.ciclo)} días</b> (cobro ${fmt(s.pmc)} + existencias ${fmt(s.pme)} − pago ${fmt(s.pmp)}): ${r.ciclo>0?'la empresa adelanta ese tiempo de actividad con su propio dinero':'los proveedores financian la operativa'}.`);
   add(`Las NOF oscilan entre ${eur(r.nofMin)} y ${eur(r.nofMax)}. La parte permanente (${eur(Math.max(0,r.nofMin))}) debería financiarse a largo plazo; la estacional (${eur(r.nofMax-Math.max(0,r.nofMin))}), con fuentes a corto como la póliza o el factoring.`);
-  if(s.fac) add(`El factoring adelanta ${eur(r.facAnt)} de cobros y reduce el saldo de clientes de ${eur(r.bal.cli1sin)} a ${eur(r.bal.cli1)}. Cuesta ${eur(r.facCost)} en el año, equivalente a un ${pct(s.facCom*360/Math.max(s.pmc,1)+s.facTipo,1)} anual frente al ${pct(s.tipo,2)} de la póliza.`);
+  if(s.fac) add(`El factoring adelanta ${eur(r.facAno)} de cobros y reduce el saldo de clientes de ${eur(r.bal.cli1sin)} a ${eur(r.bal.cli1)}. Cuesta ${eur(r.facCost)} en el año, equivalente a un ${pct(s.facCom*360/Math.max(s.pmc,1)+s.facTipo,1)} anual frente al ${pct(s.tipo,2)} de la póliza.`);
   if(s.cambio&&(s.pmc!==s.pmc0||s.pme!==s.pme0||s.pmp!==s.pmp0)) add(`Año de transición: los plazos pasan de ${fmt(s.pmc0)}/${fmt(s.pme0)}/${fmt(s.pmp0)} a ${fmt(s.pmc)}/${fmt(s.pme)}/${fmt(s.pmp)} días (cobro/existencias/pago). El cambio de NOF (${sgnEur(r.dNof)}) se nota este año en la caja.`, r.dNof>0);
   if(!s.cambio&&(s.pmc!==REF.pmc||s.pme!==REF.pme||s.pmp!==REF.pmp)&&REF.ventas>0) add('Estás comparando empresas con distintos plazos de forma estable. Para ver el impacto en caja de cambiarlos este año, marca «Los plazos han cambiado respecto al año anterior».');
   if(s.fac) add('Ojo al leer el FCO y el RCSD: el primer año de factoring libera de golpe parte del saldo de clientes. Ese efecto no se repite los años siguientes, aunque el coste sí.');
+  if(s.desc) add(`El descuento comercial adelanta ${eur(r.descAno)} de efectos, pero con recurso: los clientes siguen en el balance y aparece una deuda bancaria de ${eur(r.bal.des1)}. Si el cliente no paga al vencimiento, el banco te lo carga.`);
+  if(s.tit) add(`La titulización cede ${eur(r.titAno)} de facturas a un fondo, que retiene una reserva del ${pct(s.titRes,0)} hasta que los clientes pagan. Es un mecanismo más reciente que el factoring, pensado para carteras de facturas de cierto volumen.`);
+  if(r.kS<1) add('Has cedido más del 100 % de la facturación entre descuento, factoring y titulización: el simulador reparte proporcionalmente.',true);
+  if((s.mp||s.mb)&&s.ventas<2e7) add('El MARF es un mercado pensado para empresas medianas: emitir exige asesor registrado, documento de incorporación y, en bonos, normalmente un rating. Con este tamaño de ventas sería difícil y proporcionalmente caro.',true);
+  if(s.mp) add(`Los pagarés del MARF (${eur(s.mpImp)}) se devuelven de una vez en ${FMT.meses(s.mpPlazo)}: sirven para circulante, pero hay que renovarlos o tener caja al vencimiento.`, s.mpMes+s.mpPlazo<=11&&r.rows[s.mpMes+s.mpPlazo].saldo<s.minimo);
+  if(s.mb) add(`Los bonos del MARF (${eur(s.mbImp)}) diversifican la financiación fuera del banco y se devuelven al vencimiento: financiación permanente, adecuada para inversión y NOF permanentes.`);
+  if(s.leas&&!r.rentOn&&s.inv>0) add(`El leasing financia el ${pct(s.leasPct,0)} de la maquinaria justo cuando se paga: la caja apenas se resiente ese mes, y la deuda queda ligada al propio activo.`);
+  if(s.lb) add(`El sale and lease back convierte un activo propio en ${eur(s.lbImp)} de liquidez, pero la empresa sigue usándolo y pagando cuotas: contablemente es una financiación con garantía del activo.`);
+  if(s.rent&&s.inv>0) add(`Con renting no se paga la máquina (${eur(s.inv)}) ni entra en el activo, pero sus cuotas (${eur(r.rentAno)} este año) reducen el EBITDA.`);
+  if(s.apz) add(`Aplazar el impuesto ${FMT.meses(s.apzMeses)} da liquidez en julio a cambio de intereses de demora (${eur(r.apzI)}). Requiere solicitarlo a la Hacienda competente y, a partir de ciertos importes, aportar garantías.`);
+  if(s.nom) add('Las retenciones de IRPF y la Seguridad Social se pagan después que las nóminas: son una financiación espontánea que reduce las necesidades de caja entre liquidaciones.');
   if(s.conf) add('El confirming no cambia tu caja: sigues pagando en la misma fecha. Financia a tus proveedores, que pueden cobrar antes. Solo te ayudaría si a cambio negocias más días de pago (deslizador «Plazo de pago a proveedores»).');
   if(s.cp) add(`El préstamo a corto de ${eur(s.cpImp)} entra en ${MESES_L[s.cpMes]}${s.cpModo==='bullet'?` y se devuelve de golpe en ${MESES_L[Math.min(11,s.cpMes+s.cpPlazo)]}`:''}${s.cpMes+s.cpPlazo>11?' (vence después de diciembre)':''}: cubre un pico concreto, pero si vence en un mes de tensión crea otro.`, s.cpModo==='bullet'&&s.cpMes+s.cpPlazo<=11&&rb.rows[s.cpMes+s.cpPlazo].sinPol<s.minimo);
   if(s.lp) add(`El préstamo a largo de ${eur(s.lpImp)} es financiación permanente: adecuado para la inversión y para las NOF permanentes, no para picos de unos meses.`);
@@ -688,23 +864,18 @@ const GUIA=[
  ['lp','Préstamo bancario a largo plazo','Bancaria · largo plazo',`<p>Importe a devolver en varios años, normalmente con cuotas constantes (sistema francés). Suele pedir garantías y un RCSD de al menos 1,5.</p><p>Es la financiación adecuada para inversiones y para la parte permanente de las NOF, que forma el fondo de maniobra.</p>`],
  ['cl','Crowdlending','Plataforma · deuda',`<p>Préstamo financiado por muchos inversores a través de una plataforma de financiación participativa autorizada. Más rápido y flexible que el banco, sin consumir CIRBE, pero con tipos más altos y comisión de la plataforma.</p><p>Las plataformas suelen pedir dos ejercicios cerrados, cuentas depositadas y, en empresas pequeñas, avales personales.</p><p>Las plataformas se rigen por el Reglamento (UE) 2020/1503, al que se adaptó la Ley 5/2015.</p>`],
  ['cf','Crowdfunding de capital (crowdequity)','Plataforma · capital',`<p>Muchos pequeños inversores entran en el capital a través de una plataforma. Aporta fondos propios sin cuotas, a cambio de dilución y de la comisión de la plataforma.</p><p>Habitual en startups; conviene limitar el porcentaje por inversor si no se quiere ceder el control. El crowdfunding de recompensa o donación no da participación en la empresa.</p>`],
+ ['desc','Descuento comercial de efectos','Bancaria · corto plazo · con recurso',`<p>El banco adelanta el importe de efectos o pagarés de clientes antes de su vencimiento, a cambio de intereses y comisiones.</p><p>Es <b>con recurso</b>: si el cliente no paga, el banco lo carga a la empresa. Por eso los clientes siguen en el balance y aparece una deuda por efectos descontados. Las NOF no cambian; cambia cómo se financian.</p>`],
+ ['tit','Titulización de facturas','Mercados · corto plazo',`<p>La empresa cede facturas a un <b>fondo de titulización</b>, un patrimonio separado gestionado por una sociedad gestora y supervisado por la CNMV, que se financia emitiendo bonos para inversores. El fondo paga las facturas por adelantado y suele retener una reserva o sobrecolateral hasta que los clientes pagan.</p><p>Es un mecanismo más reciente que el factoring: da acceso a inversores institucionales, pero exige carteras de facturas de volumen y cierta estandarización. La misma técnica se aplica a flujos futuros (ingresos que aún no se han generado).</p>`],
+ ['marf','MARF: pagarés y bonos','Mercados · corto y largo plazo',`<p>El Mercado Alternativo de Renta Fija, gestionado por BME y supervisado por la CNMV, permite a empresas medianas emitir <b>pagarés</b> (a corto, para circulante) y <b>bonos</b> (a largo, con devolución al vencimiento).</p><p>Diversifica la financiación fuera del banco, pero exige asesor registrado, documento de incorporación, costes de emisión y, en bonos, normalmente un rating. Tiene sentido a partir de cierto tamaño y de un volumen de emisión relevante.</p>`],
+ ['leas','Leasing','Largo plazo · ligado a un activo',`<p>Arrendamiento financiero de un bien con opción de compra al final. En el balance, el activo entra en el inmovilizado y la deuda en el pasivo.</p><p>Financia el activo justo cuando se necesita, a un plazo alineado con su vida útil.</p>`],
+ ['lb','Sale and lease back','Largo plazo · con un activo propio',`<p>La empresa vende un activo que ya tiene (un pabellón, maquinaria) a una entidad y se lo alquila a continuación: obtiene liquidez y sigue usándolo.</p><p>Si el arrendamiento posterior es financiero, contablemente no hay venta sino una financiación con garantía del activo (PGC, NRV 8ª). Suele reducir la rentabilidad a medio plazo y se decide por presión financiera.</p>`],
+ ['rent','Renting','Alternativa operativa a invertir',`<p>Alquiler de un bien por una cuota que incluye uso, mantenimiento y seguro, sin opción de compra obligatoria. El bien no entra en el balance del arrendatario y la cuota es un gasto de explotación.</p><p>Evita el desembolso inicial y la deuda, a cambio de un coste total mayor y de un EBITDA menor. Adecuado para bienes que se quedan obsoletos pronto.</p>`],
+ ['apz','Aplazamiento de impuestos','Fiscal · corto plazo',`<p>Se puede solicitar a la Hacienda competente aplazar o fraccionar el pago de algunas deudas tributarias, con intereses de demora y, a partir de ciertos importes, garantías.</p><p>Es una fuente de liquidez puntual, no ordinaria. Algunas deudas, como las retenciones practicadas, en general no son aplazables, y el régimen difiere entre territorio común y foral.</p>`],
+ ['nom','Retenciones y Seguridad Social','Financiación espontánea',`<p>La empresa paga a sus empleados el neto cada mes, pero ingresa las cotizaciones de la Seguridad Social al mes siguiente y las retenciones de IRPF en la liquidación trimestral (mensual en grandes empresas).</p><p>Mientras tanto, ese dinero financia la operativa, igual que los proveedores. No es una fuente que se pueda negociar: es un desfase legal.</p>`],
+ ['rentab','Rentabilidad económica y financiera','Cómo afecta la financiación',`<p><b>ROA</b> = BAII / activo: mide lo que rinden los activos, sin importar cómo se financian. <b>ROE</b> = beneficio neto / patrimonio neto: lo que obtienen los socios.</p><p>Si la ROA supera el coste de la deuda, endeudarse aumenta la ROE (apalancamiento positivo); si no, la reduce. Las fuentes que sacan activos del balance (factoring, titulización, renting) pueden mejorar la ROA; las ampliaciones de capital reducen la ROE aunque refuercen la solvencia.</p>`,'wide'],
  ['ak','Ampliación de capital','Capital · coyuntural',`<p>Inyecta dinero real en caja, pero por su alto coste de control (dilución de los socios) y su lentitud, <b>solo tiene sentido en momentos muy concretos, nunca para el día a día</b>:</p><ul><li><b>Asfixia financiera extrema (preconcurso):</b> sin acceso a crédito bancario, para evitar la insolvencia con fondos de los socios o de un fondo de rescate.</li><li><b>Grandes oportunidades de inversión:</b> comprar un competidor o expandirse rápido, cuando un préstamo ahogaría a la empresa con las cuotas.</li><li><b>Startups y fases tempranas:</b> empresas que queman caja sin historial para que un banco les preste; rondas para cubrir los siguientes 12 a 18 meses.</li></ul><p><b>El peaje:</b> en el banco el coste es el interés; aquí, perder un trozo de tu empresa. Usarla para pagar las nóminas de este mes porque te ha fallado un cliente es malvender el futuro del negocio por un problema que resolvería un factoring o una póliza.</p><p>Además del coste de control, tiene un coste económico: la rentabilidad que exigen los socios es mayor que el tipo de interés de la deuda, porque asumen más riesgo. Por eso, según la teoría de la jerarquía financiera (pecking order), las empresas recurren primero a la autofinanciación, después a la deuda y, en último lugar, a nuevo capital.</p>`,'wide']
 ];
-function drawGuide(s){document.getElementById('guide').innerHTML=GUIA.map(([k,t,tag,body,wide])=>{const cls=['gcard',wide||'',s[k]?(k==='ak'&&s.akMot==='puntual'?'alert':'on'):''].join(' ');return `<div class="${cls}"><span class="tag">${tag}</span><h3>${t}</h3>${body}</div>`;}).join('');}
-
-function drawMonth(r,s){
-  const L=[['Ventas del mes (sin IVA)',x=>x.v],['Cobros de clientes',x=>x.cobros],...(s.fac?[['   de ellos, anticipados por el factoring',x=>x.anticipo]]:[]),['− Pagos a proveedores',x=>-x.pagosProv],['− Personal',x=>-x.personal],['− Otros gastos fijos',x=>-x.otros],...(s.iva?[['− Liquidación de IVA',x=>-x.liqIVA]]:[]),['− Impuesto sobre BAII',x=>-x.isPago],['− Inversión',x=>-x.invP],['= FCO (flujo de caja operativo)',x=>x.fco,'t'],
-   ['− Préstamo que ya existía: intereses',x=>-x.lpI],['− Préstamo que ya existía: principal',x=>-x.lpP],
-   ...(s.lp?[['+ Préstamo a largo nuevo: entrada',x=>x.lpIn],['− Préstamo a largo nuevo: comisión y cuotas',x=>-x.lpOut]]:[]),
-   ...(s.cp?[['+ Préstamo a corto: entrada',x=>x.cpIn],['− Préstamo a corto: intereses y devolución',x=>-x.cpOut]]:[]),
-   ...(s.cl?[['+ Crowdlending: entrada',x=>x.clIn],['− Crowdlending: comisión y cuotas',x=>-x.clOut]]:[]),
-   ...(s.fac?[['− Coste del factoring',x=>-x.fc]]:[]),
-   ['+ Ahorro fiscal por intereses',x=>x.escM],...(s.pol?[['− Póliza: intereses y comisiones',x=>-x.pol],['+ Disposición / − devolución de póliza',x=>x.dDisp]]:[]),
-   ['= FCA (flujo de caja del accionista)',x=>x.fca,'t'],['− Dividendos',x=>-x.divM],...(s.cf?[['+ Crowdfunding de capital (neto)',x=>x.cfM]]:[]),...(s.ak?[['+ Ampliación de capital',x=>x.akM]]:[]),
-   ['= Variación de tesorería',x=>x.vt,'t'],['Tesorería al final del mes',x=>x.saldo,'t'],['Tesorería sin póliza',x=>x.sinPol],...(s.pol?[['Póliza (línea de crédito) dispuesta',x=>x.disp]]:[]),['NOF al final del mes',x=>x.nof]];
-  let h='<thead><tr><th>Euros</th>'+MESES.map(m=>`<th>${m}</th>`).join('')+'</tr></thead><tbody>';
-  L.forEach(([l,fn,cls])=>{h+=`<tr class="${cls||''}"><td>${l}</td>`+r.rows.map(x=>{const v=fn(x);return `<td class="${v<-0.5?'neg':''}">${fmt(v)}</td>`;}).join('')+'</tr>';});
-  document.getElementById('month').innerHTML=h+'</tbody>';}
+function drawGuide(s){document.getElementById('guide').innerHTML=GUIA.map(([k,t,tag,body,wide])=>{const on=k==='marf'?(s.mp||s.mb):s[k]; const cls=['gcard',wide||'',on?(k==='ak'&&s.akMot==='puntual'?'alert':'on'):''].join(' ');return `<div class="${cls}"><span class="tag">${tag}</span><h3>${t}</h3>${body}</div>`;}).join('');}
 
 function load(P){ids.forEach(k=>{const el=document.getElementById(k); if(typeof P[k]==='boolean') el.checked=P[k]; else { if(R[k]){ el.max=Math.max(+el.dataset.max0, +P[k]); delete el.dataset.exact; if(+P[k]%(+el.step)!==0) el.dataset.exact=P[k]; } el.value=P[k]; }}); REF={...P}; update();}
 f.addEventListener('input',update); f.addEventListener('change',update);
