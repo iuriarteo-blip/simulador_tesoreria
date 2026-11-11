@@ -1,6 +1,6 @@
 # Simulador de tesorería a corto plazo
 
-Simulador docente para explicar por qué una empresa rentable necesita liquidez y financiación a corto plazo: presupuesto de tesorería mes a mes con cuenta de resultados, NOF, FCO, FCA, IVA, impuesto sobre beneficios, préstamo a largo plazo, dividendos, ampliación de capital y póliza de crédito.
+Simulador docente para explicar por qué una empresa rentable necesita liquidez y financiación a corto plazo: presupuesto de tesorería mes a mes con cuenta de resultados, NOF, FCO, FCA, IVA, impuesto sobre beneficios, préstamo a largo plazo, dividendos, ampliación de capital, póliza de crédito, MARF, fondos de titulización (facturas y flujos futuros) y deuda tokenizada (RWA).
 
 Enlace: https://iuriarteo-blip.github.io/simulador_tesoreria/
 
